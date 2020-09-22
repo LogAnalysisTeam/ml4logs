@@ -12,35 +12,36 @@ from loglizer import preprocessing
 from data import dataloader
 
 run_models = [
-    # 'PCA',
-    # 'DeepLog',
-    # 'InvariantsMiner',
-    # 'LogClustering',
-    # 'IsolationForest',
-    # 'LR',
-    # 'SVM',
+    'PCA',
+    'DeepLog',
+    'InvariantsMiner',
+    'LogClustering',
+    'IsolationForest',
+    'LR',
+    'SVM',
     'DecisionTree'
-    ]
+]
 
-log_path = sys.argv[1]  # 'Drain_result/'
-log_file = sys.argv[2]  # 'BGL_100k.log_structured.csv'
+log_path = sys.argv[1]  #
+struct_log = sys.argv[2]  # 'HDFS_100k.log_structured.csv'
+label_file = sys.argv[3]  # 'anomaly_label.csv'
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
     logger = logging.getLogger(__name__)
-    logger.info("loading BGL dataset")
-    (x_tr, y_train), (x_te, y_test) = dataloader.load_BGL(pjoin(log_path, log_file),
-                                                          save_path=log_path,
-                                                          window='sliding',
-                                                          time_interval=60,
-                                                          stepping_size=60,
-                                                          train_ratio=0.8)
+    logger.info("loading HDFS dataset")
+
+    (x_tr, y_train), (x_te, y_test) = dataloader.load_HDFS(pjoin(log_path, struct_log),
+                                                           label_file=label_file,
+                                                           window='session',
+                                                           train_ratio=0.5,
+                                                           split_type='uniform')
 
     benchmark_results = []
     for _model in run_models:
-        logger.info('Evaluating {} on BGL:'.format(_model))
+        logger.info('Evaluating {} on HDFS:'.format(_model))
         if _model == 'PCA':
             feature_extractor = preprocessing.FeatureExtractor()
             x_train = feature_extractor.fit_transform(x_tr, term_weighting='tf-idf',
@@ -91,7 +92,7 @@ if __name__ == '__main__':
             num_directions = 2
             topk = 5
             window_size = 10
-            epoches = 5
+            epoches = 50
             num_workers = 2
             device = 0
 

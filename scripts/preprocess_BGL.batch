@@ -18,18 +18,3 @@ cd ml4logs
 export PYTHONPATH=$PYTHONPATH:src:../logparser
 
 python -u src/data/Drain_main_BGL.py ${RAWDIR} BGL.log ${PROCDIR}
-
-#echo
-#echo 'LOGLIZER BENCHMARK'
-#echo
-#python -u ~/src/BGL_bechmark.py 'Drain_result/' 'BGL.log_structured.csv' || exit
-#echo
-# echo 'FULL TEXT DETECTION TRAIN'
-# echo
-# python ~/src/prediction_main.py -v --path './' --epochs 30 --data 'benchmark.data' --title 'bgl' --fasttext '../models/fasttext-skipgram-bgl-d100-n3-6.bin' --batch_size 1 --layer_norm True --label_by_block --evaluate_best --loss mse
-#python ~/src/prediction_main.py -v --path './' --epochs 30 --data 'benchmark.data' --title 'bgl-line' --fasttext '../models/fasttext-skipgram-bgl-d100-n3-6.bin' --batch_size 1 --layer_norm True --evaluate_best --loss mse
-
-#python ~/src/classification_main.py -v --path './' --epochs 30 --data 'benchmark_anomal.data' --title 'bgl' --fasttext '../models/fasttext-skipgram-bgl-d100-n3-6.bin' --batch_size 1 --weight 30 --layer_norm True --label_by_block
-#python ~/src/classification_main.py -v --path './' --epochs 30 --data 'benchmark_anomal.data' --title 'bgl-line' --fasttext '../models/fasttext-skipgram-bgl-d100-n3-6.bin' --batch_size 1 --weight 30 --layer_norm True
-#python ~/src/classification_main.py -v --path './' --epochs 30 --data 'benchmark_anomal.data' --title 'bgl' --fasttext '../models/fasttext-skipgram-bgl-d100-n1-1.bin' --batch_size 1 --weight 30 --layer_norm True --label_by_block
-#python ~/src/classification_main.py -v --path './' --epochs 30 --data 'benchmark_anomal.data' --title 'bgl-line' --fasttext '../models/fasttext-skipgram-bgl-d100-n1-1.bin' --batch_size 1 --weight 30 --layer_norm True

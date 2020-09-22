@@ -3,12 +3,12 @@
 #SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
 #SBATCH --partition=gpu --gres=gpu:1
 #SBATCH --mem=64G
-#SBATCH --error=../logs/benchmark_BGL.%j.err
-#SBATCH --out=../logs/benchmark_BGL.%j.out
+#SBATCH --error=../logs/benchmark_HDFS.%j.err
+#SBATCH --out=../logs/benchmark_HDFS.%j.out
 
 cd ..
-RAWDIR=`readlink -f data/raw/BGL`
-PROCDIR=`readlink -f data/processed/BGL`
+RAWDIR=`readlink -f data/raw/HDFS1`
+PROCDIR=`readlink -f data/processed/HDFS1`
 mkdir -p ${PROCDIR}
 
 cd ..
@@ -17,4 +17,4 @@ cd ml4logs
 
 export PYTHONPATH=$PYTHONPATH:src:../logparser:../loglizer
 
-python -u src/models/benchmark_BGL.py ${PROCDIR} 'BGL.log_structured.csv'
+python -u src/models/benchmark_HDFS.py ${PROCDIR} 'HDFS.log_structured.csv' $RAWDIR'/anomaly_label.csv'
