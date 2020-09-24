@@ -8,8 +8,11 @@
 
 cd ..
 RAWDIR=`readlink -f data/raw/BGL`
-PROCDIR=`readlink -f data/processed/BGL`
+PROCDIR=`readlink -f data/processed`"/BGL"
 mkdir -p ${PROCDIR}
+
+echo "RAWDIR: $RAWDIR"
+echo "PROCDIR: $PROCDIR"
 
 cd ..
 source source_init.sh

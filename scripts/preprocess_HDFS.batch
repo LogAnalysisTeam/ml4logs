@@ -8,8 +8,11 @@
 
 cd ..
 RAWDIR=`readlink -f data/raw/HDFS1`
-PROCDIR=`readlink -f data/processed/HDFS1`
+PROCDIR=`readlink -f data/processed`"/HDFS1"
 mkdir -p ${PROCDIR}
+
+echo "RAWDIR: $RAWDIR"
+echo "PROCDIR: $PROCDIR"
 
 cd ..
 source source_init.sh
