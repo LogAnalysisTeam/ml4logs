@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
+#SBATCH --partition=gpu --gres=gpu:1
+#SBATCH --mem=64G
+#SBATCH --error=../logs/train_supervised_model_BGL.%j.err
+#SBATCH --out=../logs/train_supervised_model_BGL.%j.out
+
+cd ..
+RAWDIR=`readlink -f data/raw/BGL`
+PROCDIR=`readlink -f data`/processed/BGL
+
+DATA=${PROCDIR}"/benchmark_anomal.pt"
+FASTTEXTFILE="fasttext-skipgram-bgl-d100-n1-1.bin"
+FASTTEXTFULL=`readlink -f models/embeddings/fasttext/`"/${FASTTEXTFILE}"
+EPOCHS=30
+BSIZE=1
+WEIGHT=30
+LAYERNORM="True"
+
+
+RESDIR=`readlink -f reports`/results/HDFS"/supervised/${FASTTEXTFILE}_e${EPOCHS}_bs${BSIZE}_w${WEIGHT}_ln${LAYERNORM}"
+mkdir -p ${RESDIR}
+
+cd ..
+source source_init.sh
+cd ml4logs
+
+export PYTHONPATH=$PYTHONPATH:src:../logparser
+
+python -u src/models/classification_main.py -v --path ${RESDIR} --epochs ${EPOCHS} --data ${DATA} --fasttext ${FASTTEXTFULL} --batch_size ${BSIZE} --weight ${WEIGHT} --layer_norm ${LAYERNORM} --label_by_block

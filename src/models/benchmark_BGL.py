@@ -17,9 +17,9 @@ run_models = [
     # 'InvariantsMiner',
     # 'LogClustering',
     # 'IsolationForest',
-    # 'LR',
+    'LR',
     # 'SVM',
-    'DecisionTree'
+    # 'DecisionTree'
     ]
 
 log_path = sys.argv[1]  # 'Drain_result/'
