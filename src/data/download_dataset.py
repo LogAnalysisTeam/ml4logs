@@ -14,9 +14,7 @@ known_datasets = {
     'HDFS2': {'url': 'https://zenodo.org/record/3227177/files/HDFS_2.tar.gz?download=1', 'file': 'HDFS_2.tar.gz'},
 }
 
-@click.command()
-@click.argument('datasets', type=click.Choice(known_datasets, case_sensitive=False), nargs=-1)
-def main(datasets):
+def download(datasets):
     """ Downloads raw dataset(s)
     """
     logger = logging.getLogger(__name__)
@@ -41,6 +39,11 @@ def main(datasets):
         tar.close()
         logger.info('deleting archive: {}'.format(outfile))
         os.remove(outfile)
+
+@click.command()
+@click.argument('datasets', type=click.Choice(known_datasets, case_sensitive=False), nargs=-1)
+def main(datasets):
+    download(datasets)
 
 
 if __name__ == '__main__':
