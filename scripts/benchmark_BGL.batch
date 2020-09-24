@@ -15,6 +15,6 @@ cd ..
 source source_init.sh
 cd ml4logs
 
-export PYTHONPATH=$PYTHONPATH:src:../logparser:../loglizer
+export PYTHONPATH=$PYTHONPATH:src:../logparser
 
 python -u src/models/benchmark_BGL.py ${PROCDIR} 'BGL.log_structured.csv'

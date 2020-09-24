@@ -8,13 +8,15 @@
 
 cd ..
 RAWDIR=`readlink -f data/raw/HDFS1`
-PROCDIR=`readlink -f data/processed/HDFS1`
+PROCDIR=`readlink -f data`/processed/HDFS1
+RESDIR=`readlink -f reports`/results/HDFS1`
 mkdir -p ${PROCDIR}
+mkdir -p ${RESDIR}
 
 cd ..
 source source_init.sh
 cd ml4logs
 
-export PYTHONPATH=$PYTHONPATH:src:../logparser:../loglizer
+export PYTHONPATH=$PYTHONPATH:src:../logparser
 
-python -u src/models/benchmark_HDFS.py ${PROCDIR} 'HDFS.log_structured.csv' $RAWDIR'/anomaly_label.csv'
+python -u src/models/benchmark_HDFS.py ${PROCDIR} 'HDFS.log_structured.csv' $RAWDIR'/anomaly_label.csv' $RESDIR

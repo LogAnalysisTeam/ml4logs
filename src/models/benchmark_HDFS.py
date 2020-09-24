@@ -25,6 +25,7 @@ run_models = [
 log_path = sys.argv[1]  #
 struct_log = sys.argv[2]  # 'HDFS_100k.log_structured.csv'
 label_file = sys.argv[3]  # 'anomaly_label.csv'
+result_dir = sys.argv[4]
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -37,7 +38,8 @@ if __name__ == '__main__':
                                                            label_file=label_file,
                                                            window='session',
                                                            train_ratio=0.5,
-                                                           split_type='uniform')
+                                                           split_type='uniform', 
+                                                           save_path=log_path)
 
     benchmark_results = []
     for _model in run_models:
@@ -123,4 +125,4 @@ if __name__ == '__main__':
         benchmark_results.append([_model + '-test', precision, recall, f1])
 
     pd.DataFrame(benchmark_results, columns=['Model', 'Precision', 'Recall', 'F1']) \
-        .to_csv('benchmark_result.csv', index=False)
+        .to_csv(pjoin(result_dir, 'benchmark_result.csv'), index=False)
