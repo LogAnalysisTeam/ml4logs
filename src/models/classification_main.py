@@ -134,4 +134,4 @@ if __name__ == "__main__":
         logger.info('Generating figures')
         visualize_env(str(args.path))
     except Exception as e:
-        logger.info(str(e)))
+        logger.info(str(e))

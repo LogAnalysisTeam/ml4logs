@@ -7,9 +7,7 @@ import sys
 
 import pandas as pd
 from loglizer.models import *
-from loglizer import preprocessing
-
-from data import dataloader
+from loglizer import dataloader, preprocessing
 
 run_models = [
     'PCA',

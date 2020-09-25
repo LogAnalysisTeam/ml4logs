@@ -7,9 +7,9 @@
 #SBATCH --out=../logs/benchmark_HDFS.%j.out
 
 cd ..
-RAWDIR=`readlink -f data/raw/HDFS1`
+RAWDIR=`readlink -f data`/raw/HDFS1
 PROCDIR=`readlink -f data`/processed/HDFS1
-RESDIR=`readlink -f reports`/results/HDFS1`
+RESDIR=`readlink -f reports`/results/HDFS1
 mkdir -p ${PROCDIR}
 mkdir -p ${RESDIR}
 

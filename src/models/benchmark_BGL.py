@@ -7,23 +7,22 @@ import sys
 
 import pandas as pd
 from loglizer.models import *
-from loglizer import preprocessing
-
-from data import dataloader
+from loglizer import dataloader, preprocessing
 
 run_models = [
-    # 'PCA',
-    # 'DeepLog',
-    # 'InvariantsMiner',
-    # 'LogClustering',
-    # 'IsolationForest',
+    'PCA',
+    'InvariantsMiner',
+    'IsolationForest',
     'LR',
-    # 'SVM',
-    # 'DecisionTree'
+    'SVM',
+    'DecisionTree'
+    'LogClustering',
+    'DeepLog',
     ]
 
 log_path = sys.argv[1]  # 'Drain_result/'
 log_file = sys.argv[2]  # 'BGL_100k.log_structured.csv'
+result_dir = sys.argv[3]
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -34,8 +33,8 @@ if __name__ == '__main__':
     (x_tr, y_train), (x_te, y_test) = dataloader.load_BGL(pjoin(log_path, log_file),
                                                           save_path=log_path,
                                                           window='sliding',
-                                                          time_interval=60,
-                                                          stepping_size=60,
+                                                          time_interval=1,
+                                                          stepping_size=1,
                                                           train_ratio=0.8)
 
     benchmark_results = []
@@ -120,6 +119,6 @@ if __name__ == '__main__':
         logger.info('Test accuracy:')
         precision, recall, f1 = model.evaluate(x_test, y_test)
         benchmark_results.append([_model + '-test', precision, recall, f1])
-
+ 
     pd.DataFrame(benchmark_results, columns=['Model', 'Precision', 'Recall', 'F1']) \
-        .to_csv('benchmark_result.csv', index=False)
+        .to_csv(pjoin(result_dir, 'benchmark_result.csv'), index=False)

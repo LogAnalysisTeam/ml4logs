@@ -7,14 +7,16 @@
 #SBATCH --out=../logs/benchmark_BGL.%j.out
 
 cd ..
-RAWDIR=`readlink -f data/raw/BGL`
-PROCDIR=`readlink -f data/processed/BGL`
+RAWDIR=`readlink -f data/`raw/BGL
+PROCDIR=`readlink -f data/`/processed/BGL
+RESDIR=`readlink -f reports`/results/BGL
 mkdir -p ${PROCDIR}
-
+mkdir -p ${RESDIR}
 cd ..
 source source_init.sh
 cd ml4logs
 
 export PYTHONPATH=$PYTHONPATH:src:../logparser
 
-python -u src/models/benchmark_BGL.py ${PROCDIR} 'BGL.log_structured.csv'
+python -u src/models/benchmark_BGL.py ${PROCDIR} 'BGL.log_structured.csv' $RESDIR
+

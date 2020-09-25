@@ -1,5 +1,7 @@
 # local package
 -e .
+git+https://github.com/LogAnalysisTeam/logparser.git
+git+https://github.com/LogAnalysisTeam/loglizer.git
 
 # external requirements
 click
