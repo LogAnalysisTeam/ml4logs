@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 
 import logging
 
-from data.data_loaders import LogBlocksDataset, padd_batch
+from data.utils import LogBlocksDataset, padd_batch
 from prediction import LogAnomalyDetection
 from visualization.visualize_env import visualize_env
 

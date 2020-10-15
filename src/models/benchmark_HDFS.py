@@ -7,7 +7,9 @@ import sys
 
 import pandas as pd
 from loglizer.models import *
-from loglizer import dataloader, preprocessing
+from loglizer import preprocessing
+
+from data.hdfs import load_HDFS
 
 run_models = [
     'PCA',
@@ -32,16 +34,16 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     logger.info("loading HDFS dataset")
 
-    (x_tr, y_train), (x_te, y_test) = dataloader.load_HDFS(pjoin(log_path, struct_log),
-                                                           label_file=label_file,
-                                                           window='session',
-                                                           train_ratio=0.5,
-                                                           split_type='uniform', 
-                                                           save_path=log_path)
+    (x_tr, y_train), (x_te, y_test) = load_HDFS(pjoin(log_path, struct_log),
+                                                label_file=label_file,
+                                                window='session',
+                                                train_ratio=0.5,
+                                                split_type='uniform',
+                                                save_path=log_path)
 
     benchmark_results = []
     for _model in run_models:
-        logger.info('Evaluating {} on HDFS:'.format(_model))
+        logger.info('evaluating {} on HDFS:'.format(_model))
         if _model == 'PCA':
             feature_extractor = preprocessing.FeatureExtractor()
             x_train = feature_extractor.fit_transform(x_tr, term_weighting='tf-idf',
@@ -57,9 +59,11 @@ if __name__ == '__main__':
 
         elif _model == 'LogClustering':
             feature_extractor = preprocessing.FeatureExtractor()
-            x_train = feature_extractor.fit_transform(x_tr, term_weighting='tf-idf')
+            x_train = feature_extractor.fit_transform(
+                x_tr, term_weighting='tf-idf')
             model = LogClustering(max_dist=0.3, anomaly_threshold=0.3)
-            model.fit(x_train[y_train == 0, :])  # Use only normal samples for training
+            # Use only normal samples for training
+            model.fit(x_train[y_train == 0, :])
 
         elif _model == 'IsolationForest':
             feature_extractor = preprocessing.FeatureExtractor()
@@ -70,19 +74,22 @@ if __name__ == '__main__':
 
         elif _model == 'LR':
             feature_extractor = preprocessing.FeatureExtractor()
-            x_train = feature_extractor.fit_transform(x_tr, term_weighting='tf-idf')
+            x_train = feature_extractor.fit_transform(
+                x_tr, term_weighting='tf-idf')
             model = LR()
             model.fit(x_train, y_train)
 
         elif _model == 'SVM':
             feature_extractor = preprocessing.FeatureExtractor()
-            x_train = feature_extractor.fit_transform(x_tr, term_weighting='tf-idf')
+            x_train = feature_extractor.fit_transform(
+                x_tr, term_weighting='tf-idf')
             model = SVM()
             model.fit(x_train, y_train)
 
         elif _model == 'DecisionTree':
             feature_extractor = preprocessing.FeatureExtractor()
-            x_train = feature_extractor.fit_transform(x_tr, term_weighting='tf-idf')
+            x_train = feature_extractor.fit_transform(
+                x_tr, term_weighting='tf-idf')
             model = DecisionTree()
             model.fit(x_train, y_train)
 
@@ -97,21 +104,28 @@ if __name__ == '__main__':
             device = 0
 
             feature_extractor = preprocessing.Vectorizer()
-            train_dataset = feature_extractor.fit_transform(*dataloader.slice_hdfs(x_tr, y_train, window_size))
-            test_dataset = feature_extractor.transform(*dataloader.slice_hdfs(x_te, y_test, window_size))
+            train_dataset = feature_extractor.fit_transform(
+                *dataloader.slice_hdfs(x_tr, y_train, window_size))
+            test_dataset = feature_extractor.transform(
+                *dataloader.slice_hdfs(x_te, y_test, window_size))
 
-            train_loader = preprocessing.Iterator(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers).iter
-            test_loader = preprocessing.Iterator(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers).iter
+            train_loader = preprocessing.Iterator(
+                train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers).iter
+            test_loader = preprocessing.Iterator(
+                test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers).iter
 
-            model = DeepLog(num_labels=feature_extractor.num_labels, hidden_size=hidden_size, num_directions=num_directions, topk=topk, device=device)
+            model = DeepLog(num_labels=feature_extractor.num_labels, hidden_size=hidden_size,
+                            num_directions=num_directions, topk=topk, device=device)
             model.fit(train_loader, epoches)
 
             logger.info('Train accuracy:')
             metrics = model.evaluate(train_loader)
-            benchmark_results.append([_model + '-train', metrics['precision'], metrics['recall'], metrics['f1']])
+            benchmark_results.append(
+                [_model + '-train', metrics['precision'], metrics['recall'], metrics['f1']])
             logger.info('Test accuracy:')
             metrics = model.evaluate(test_loader)
-            benchmark_results.append([_model + '-test', metrics['precision'], metrics['recall'], metrics['f1']])
+            benchmark_results.append(
+                [_model + '-test', metrics['precision'], metrics['recall'], metrics['f1']])
             continue
 
         x_test = feature_extractor.transform(x_te)

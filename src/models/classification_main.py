@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 import logging
 
 from classification import LogClassification
-from data.data_loaders import LogBlocksDataset, padd_batch
+from data.utils import LogBlocksDataset, padd_batch
 from visualization.visualize_env import visualize_env
 
 logger = logging.getLogger(__name__)

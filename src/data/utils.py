@@ -1,5 +1,8 @@
+import numpy as np
+from os.path import join as pjoin
 import logging
 import torch
+
 from torch.utils.data import Dataset
 
 logger = logging.getLogger(__name__)
@@ -185,3 +188,73 @@ class LogBlocksSequancesDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.generate_sample_from_idx(idx)
+
+"""
+Helper used by HDFS and BGL loaders.
+"""
+def save_for_fulltext_detection(block_dict, blk_train, blk_test, save_path, rng, val_ratio=0.8):
+    logger.info('saving datasets for full text detection')
+    logger.info(f'train-validation split ratio: {val_ratio}')
+    import torch
+    validation_idx = int(len(blk_train) * val_ratio)
+    rng.shuffle(blk_train)
+    baf = pjoin(save_path, 'benchmark_anomal.pt')
+    bf = pjoin(save_path, 'benchmark.pt')
+    torch.save({
+        'train': [block_dict[blk] for blk in blk_train[0:validation_idx]],
+        'validation': [block_dict[blk] for blk in blk_train[validation_idx:]],
+        'test': [block_dict[blk] for blk in blk_test]
+    }, baf)
+    torch.save({
+        'train': [block_dict[blk] for blk in blk_train[0:validation_idx] if not block_dict[blk]['label']],
+        'validation': [block_dict[blk] for blk in blk_train[validation_idx:] if not block_dict[blk]['label']],
+        'test': [block_dict[blk] for blk in blk_test]
+    }, bf)
+
+"""
+Dataset splitting for HDFS and BGL. Code from https://github.com/logpai/loglizer
+"""
+def split_data(x_data, y_data=None, id_data=None, train_ratio=0, split_type='uniform', rng=np.random.RandomState(1234)):
+    assert split_type in ["uniform", "sequential"]
+    if split_type == 'uniform' and y_data is not None:
+        pos_idx = y_data > 0
+        
+        x_pos = x_data[pos_idx] # all positive samples
+        y_pos = y_data[pos_idx]
+        id_pos = id_data[pos_idx]
+
+        x_neg = x_data[~pos_idx] # all negative
+        y_neg = y_data[~pos_idx]
+        id_neg = id_data[~pos_idx]
+
+        train_pos = int(train_ratio * x_pos.shape[0]) # select the same ratio for positive and negative samples
+        train_neg = int(train_ratio * x_neg.shape[0])
+
+        x_train = np.hstack([x_pos[0:train_pos], x_neg[0:train_neg]])
+        y_train = np.hstack([y_pos[0:train_pos], y_neg[0:train_neg]])
+        id_train = np.hstack([id_pos[0:train_pos], id_neg[0:train_neg]])
+
+        x_test = np.hstack([x_pos[train_pos:], x_neg[train_neg:]])
+        y_test = np.hstack([y_pos[train_pos:], y_neg[train_neg:]])
+        id_test = np.hstack([id_pos[train_pos:], id_neg[train_neg:]])
+    elif split_type == 'sequential':
+        num_train = int(train_ratio * x_data.shape[0])
+        x_train = x_data[0:num_train]
+        x_test = x_data[num_train:]
+        if y_data is None:
+            y_train = None
+            y_test = None
+        else:
+            y_train = y_data[0:num_train]
+            y_test = y_data[num_train:]
+    # Random shuffle
+    indexes = np.arange(x_train.shape[0])
+    rng.shuffle(indexes)
+    x_train = x_train[indexes]
+    if y_train is not None:
+        y_train = y_train[indexes]
+
+    if id_data is not None:
+        return (x_train, y_train), (x_test, y_test), (id_train, id_test)
+
+    return (x_train, y_train), (x_test, y_test)

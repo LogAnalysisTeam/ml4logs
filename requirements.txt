@@ -17,4 +17,5 @@ numpy
 pandas
 sklearn
 torch>=1.5.1
+tqdm
 wandb>=0.10.2
