@@ -10,6 +10,7 @@ from loglizer.models import *
 from loglizer import preprocessing
 
 from data.hdfs import load_HDFS
+from data.utils import slice_sessions
 
 run_models = [
     'PCA',
@@ -105,9 +106,9 @@ if __name__ == '__main__':
 
             feature_extractor = preprocessing.Vectorizer()
             train_dataset = feature_extractor.fit_transform(
-                *dataloader.slice_hdfs(x_tr, y_train, window_size))
+                *slice_sessions(x_tr, y_train, window_size))
             test_dataset = feature_extractor.transform(
-                *dataloader.slice_hdfs(x_te, y_test, window_size))
+                *slice_sessions(x_te, y_test, window_size))
 
             train_loader = preprocessing.Iterator(
                 train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers).iter

@@ -7,7 +7,7 @@ from datetime import datetime
 from collections import OrderedDict
 from tqdm import tqdm
 
-from .utils import save_for_fulltext_detection, split_data
+from .utils import save_for_fulltext_detection, split_data, slice_sessions
 
 import logging
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ def load_HDFS(log_file, label_file=None, window='session', train_ratio=0.5, spli
             struct_log = struct_log.head(first) 
         data_dict = OrderedDict()
         block_dict = {}
-        for idx, row in tqdm(struct_log.iterrows()):
+        for idx, row in tqdm(struct_log.iterrows(), total=len(struct_log)):
             blkId_list = re.findall(r'(blk_-?\d+)', row['Content'])
             blkId_set = set(blkId_list)
             for blk_Id in blkId_set:
@@ -93,8 +93,8 @@ def load_HDFS(log_file, label_file=None, window='session', train_ratio=0.5, spli
             data_df.to_csv(pjoin(save_path, 'data_instances.csv'), index=False)
 
         if window_size > 0:
-            x_train, window_y_train, y_train = slice_hdfs(x_train, y_train, window_size)
-            x_test, window_y_test, y_test = slice_hdfs(x_test, y_test, window_size)
+            x_train, window_y_train, y_train = slice_sessions(x_train, y_train, window_size)
+            x_test, window_y_test, y_test = slice_sessions(x_test, y_test, window_size)
             log = "{} {} windows ({}/{} anomaly), {}/{} normal"
             logger.info(log.format("Train:", x_train.shape[0], y_train.sum(), y_train.shape[0], (1-y_train).sum(), y_train.shape[0]))
             logger.info(log.format("Test:", x_test.shape[0], y_test.sum(), y_test.shape[0], (1-y_test).sum(), y_test.shape[0]))
@@ -130,21 +130,3 @@ def load_HDFS(log_file, label_file=None, window='session', train_ratio=0.5, spli
 
     return (x_train, y_train), (x_test, y_test)
 
-
-def slice_hdfs(x, y, window_size):
-    results_data = []
-    logger.info("Slicing {} sessions, with window {}".format(x.shape[0], window_size))
-    for idx, sequence in enumerate(x):
-        seqlen = len(sequence)
-        i = 0
-        while (i + window_size) < seqlen:
-            slice = sequence[i: i + window_size]
-            results_data.append([idx, slice, sequence[i + window_size], y[idx]])
-            i += 1
-        else:
-            slice = sequence[i: i + window_size]
-            slice += ["#Pad"] * (window_size - len(slice))
-            results_data.append([idx, slice, "#Pad", y[idx]])
-    results_df = pd.DataFrame(results_data, columns=["SessionId", "EventSequence", "Label", "SessionLabel"])
-    logger.info("Slicing done, {} windows generated".format(results_df.shape[0]))
-    return results_df[["SessionId", "EventSequence"]], results_df["Label"], results_df["SessionLabel"]

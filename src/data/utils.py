@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from os.path import join as pjoin
 import logging
 import torch
@@ -258,3 +259,21 @@ def split_data(x_data, y_data=None, id_data=None, train_ratio=0, split_type='uni
         return (x_train, y_train), (x_test, y_test), (id_train, id_test)
 
     return (x_train, y_train), (x_test, y_test)
+
+def slice_sessions(x, y, window_size):
+    results_data = []
+    logger.info("slicing {} sessions, with window {}".format(x.shape[0], window_size))
+    for idx, sequence in enumerate(x):
+        seqlen = len(sequence)
+        i = 0
+        while (i + window_size) < seqlen:
+            slice = sequence[i: i + window_size]
+            results_data.append([idx, slice, sequence[i + window_size], y[idx]])
+            i += 1
+        else:
+            slice = sequence[i: i + window_size]
+            slice += ["#Pad"] * (window_size - len(slice))
+            results_data.append([idx, slice, "#Pad", y[idx]])
+    results_df = pd.DataFrame(results_data, columns=["SessionId", "EventSequence", "Label", "SessionLabel"])
+    logger.info("Slicing done, {} windows generated".format(results_df.shape[0]))
+    return results_df[["SessionId", "EventSequence"]], results_df["Label"], results_df["SessionLabel"]
