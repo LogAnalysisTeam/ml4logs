@@ -67,8 +67,12 @@ def load_HDFS(log_file, label_file=None, window='session', train_ratio=0.5, spli
                     data_dict[blk_Id] = []
                     block_dict[blk_Id] = {'blk':blk_Id, 'logs':[], 'timestamps':[]}
                 data_dict[blk_Id].append(row['EventId'])
-                block_dict[blk_Id]['logs'].append(f"{row['Level']} {row['Component']}: {row['Content']}")
-                block_dict[blk_Id]['timestamps'].append(datetime.strptime(f"{row['Date']:06d} {row['Time']:06d}", '%d%m%y %H%M%S').timestamp())
+                if "Level" in row and "Component" in row:
+                    block_dict[blk_Id]['logs'].append(f"{row['Level']} {row['Component']}: {row['Content']}")
+                else:
+                    block_dict[blk_Id]['logs'].append(f"{row['Content']}")
+                if "Date" in row and "Time" in row:
+                    block_dict[blk_Id]['timestamps'].append(datetime.strptime(f"{row['Date']:06d} {row['Time']:06d}", '%d%m%y %H%M%S').timestamp())
 
         data_df = pd.DataFrame(list(data_dict.items()), columns=['BlockId', 'EventSequence'])
         

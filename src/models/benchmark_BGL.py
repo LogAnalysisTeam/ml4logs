@@ -18,7 +18,7 @@ run_models = [
     'IsolationForest',
     'LR',
     'SVM',
-    'DecisionTree'
+    'DecisionTree',
     'LogClustering',
     'DeepLog',
 ]
@@ -134,6 +134,8 @@ if __name__ == '__main__':
         logger.info('Test accuracy:')
         precision, recall, f1 = model.evaluate(x_test, y_test)
         benchmark_results.append([_model + '-test', precision, recall, f1])
+
+    logger.info(f"benchmark_results:\n{benchmark_results}")
 
     pd.DataFrame(benchmark_results, columns=['Model', 'Precision', 'Recall', 'F1']) \
         .to_csv(pjoin(result_dir, 'benchmark_result.csv'), index=False)

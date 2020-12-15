@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --time=4:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
+#SBATCH --partition=cpufast
+#SBATCH --mem=256G
+#SBATCH --error=../logs/preprocess_Thunderbird.%j.err
+#SBATCH --out=../logs/preprocess_Thunderbird.%j.out
+
+cd ..
+RAWDIR=`readlink -f data/raw/Thunderbird`
+PROCDIR=`readlink -f data/processed`"/Thunderbird"
+mkdir -p ${PROCDIR}
+
+echo "RAWDIR: $RAWDIR"
+echo "PROCDIR: $PROCDIR"
+
+cd ..
+source source_init.sh
+cd ml4logs
+
+export PYTHONPATH=$PYTHONPATH:src:../logparser
+
+python -u src/data/Drain_main_Thunderbird.py ${RAWDIR} Thunderbird.log ${PROCDIR}

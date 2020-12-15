@@ -12,6 +12,8 @@ known_datasets = {
     'BGL': {'url': 'https://zenodo.org/record/3227177/files/BGL.tar.gz?download=1', 'file': 'BGL.tar.gz'},
     'HDFS1': {'url': 'https://zenodo.org/record/3227177/files/HDFS_1.tar.gz?download=1', 'file': 'HDFS_1.tar.gz'},
     'HDFS2': {'url': 'https://zenodo.org/record/3227177/files/HDFS_2.tar.gz?download=1', 'file': 'HDFS_2.tar.gz'},
+    'OpenStack': {'url': 'https://zenodo.org/record/3227177/files/OpenStack.tar.gz?download=1', 'file': 'OpenStack.tar.gz'},
+    'Thunderbird': {'url': 'https://zenodo.org/record/3227177/files/Thunderbird.tar.gz?download=1', 'file': 'Thunderbird.tar.gz'},
 }
 
 def download(datasets):
