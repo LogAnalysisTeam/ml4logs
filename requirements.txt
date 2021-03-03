@@ -18,5 +18,10 @@ numpy
 pandas
 sklearn
 torch>=1.5.1
+datasets>=1.3.0
 tqdm
 wandb>=0.10.2
+seaborn
+transformers>=4.3.0
+jupyterlab
+ipywidgets
