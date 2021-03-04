@@ -51,7 +51,8 @@ def run_experiment(config):
                                                                           dataset_sentence_count=len(cleaned_dataset),
                                                                           context_size=config.context_sentence_count,
                                                                           train_batch_size=config.train_batch_size,
-                                                                          eval_batch_size=config.eval_batch_size)
+                                                                          eval_batch_size=config.eval_batch_size,
+                                                                          eval_percentage=config.eval_ratio)
 
     subset_tokenized_dataset = tokenized_cleaned_dataset.select(range(sentence_count))
     chunked = subset_tokenized_dataset.map(chunkify, batched=True, batch_size=config.context_sentence_count, drop_last_batch=True, remove_columns=subset_tokenized_dataset.column_names)
@@ -70,7 +71,7 @@ def run_experiment(config):
                                       logging_dir='../../logs',            # directory for storing logs
                                       logging_steps=10,
                                       logging_first_step=True,
-                                      eval_steps=100,
+                                      eval_steps=400,
                                       evaluation_strategy='steps',
                                       prediction_loss_only=True,
                                       save_steps=200,
@@ -107,6 +108,7 @@ def main():
     parser.add_argument("--how-many-sentences-to-use", default=1000000, type=int)
     parser.add_argument("--train-batch-size", default=64, type=int)
     parser.add_argument("--epochs", default=3, type=int)
+    parser.add_argument("--eval-ratio", default=0.2, type=float)
     parser.add_argument("--eval-batch-size", default=64, type=int)
     parser.add_argument("--target-max-seq-len", default=512, type=int)
     parser.add_argument("--context-max-seq-len", default=512, type=int)
