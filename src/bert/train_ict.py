@@ -2,6 +2,7 @@ import os
 from datasets import load_dataset
 from transformers import AutoTokenizer, Trainer, TrainingArguments
 from ict import DataCollatorForInverseClozeTask, OneTowerICT, TwoTowerICT
+import torch
 
 SEED = 42
 
@@ -35,8 +36,8 @@ def chunkify(examples):
 
 
 def run_experiment(config):
-    os.environ["WANDB_PROJECT"] = "ICT"
-    RUN_NAME = f'{"2T" if config.two_tower else "1T"} T-maxlen {config.target_max_seq_len} C-maxlen {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
+    os.environ["WANDB_PROJECT"] = f"ICT"
+    RUN_NAME = f'{"2T" if config.two_tower else "1T"} Eps {config.epochs} Lines {config.how_many_sentences_to_use} T-len {config.target_max_seq_len} C-len {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
     print(RUN_NAME)
     tokenizer = AutoTokenizer.from_pretrained(config.bert_model, use_fast=True)
     data_collator = DataCollatorForInverseClozeTask(remove_target_from_context_probability=config.remove_target_percentage,
@@ -45,18 +46,18 @@ def run_experiment(config):
 
     hdfs1_dataset = load_dataset('text', data_files='../../data/raw/HDFS1/HDFS.log', split='train')
     cleaned_dataset = hdfs1_dataset.map(remove_timestamp)
+    tokenized_cleaned_dataset = cleaned_dataset.map(tokenize_no_special_tokens, fn_kwargs={'tokenizer': tokenizer}, batched=True, batch_size=10000)
     sentence_count, train_contexts, eval_contexts = compute_dataset_sizes(desired_sentence_count=config.how_many_sentences_to_use,
                                                                           dataset_sentence_count=len(cleaned_dataset),
                                                                           context_size=config.context_sentence_count,
                                                                           train_batch_size=config.train_batch_size,
                                                                           eval_batch_size=config.eval_batch_size)
 
-    subset_cleaned_dataset = cleaned_dataset.select(range(sentence_count))
-    tokenized_dataset = subset_cleaned_dataset.map(tokenize_no_special_tokens, fn_kwargs={'tokenizer': tokenizer}, batched=True, batch_size=10000)
-    chunked = tokenized_dataset.map(chunkify, batched=True, batch_size=config.context_sentence_count, drop_last_batch=True, remove_columns=tokenized_dataset.column_names)
+    subset_tokenized_dataset = tokenized_cleaned_dataset.select(range(sentence_count))
+    chunked = subset_tokenized_dataset.map(chunkify, batched=True, batch_size=config.context_sentence_count, drop_last_batch=True, remove_columns=subset_tokenized_dataset.column_names)
     train_test_dataset = chunked.train_test_split(train_size=train_contexts, test_size=eval_contexts, shuffle=True, seed=SEED)
 
-    model = TwoTowerICT(config.bert_model, output_encode_dimension=config.output_encode_dim) if config.two_tower else OneTowerICT(config.bert_model, output_encode_dimension=output_encode_dim)
+    model = TwoTowerICT(config.bert_model, output_encode_dimension=config.output_encode_dim) if config.two_tower else OneTowerICT(config.bert_model, output_encode_dimension=config.output_encode_dim)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
@@ -69,11 +70,11 @@ def run_experiment(config):
                                       logging_dir='../../logs',            # directory for storing logs
                                       logging_steps=10,
                                       logging_first_step=True,
-                                      eval_steps=50,
+                                      eval_steps=100,
                                       evaluation_strategy='steps',
                                       prediction_loss_only=True,
-                                      save_steps=100,
-                                      save_total_limit=15,
+                                      save_steps=200,
+                                      save_total_limit=25,
                                       label_names=['target', 'context'],
                                       seed=SEED,
                                       run_name=RUN_NAME,
@@ -105,6 +106,7 @@ def main():
     parser.add_argument("--context-sentence-count", default=10, type=int)
     parser.add_argument("--how-many-sentences-to-use", default=1000000, type=int)
     parser.add_argument("--train-batch-size", default=64, type=int)
+    parser.add_argument("--epochs", default=3, type=int)
     parser.add_argument("--eval-batch-size", default=64, type=int)
     parser.add_argument("--target-max-seq-len", default=512, type=int)
     parser.add_argument("--context-max-seq-len", default=512, type=int)

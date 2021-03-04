@@ -18,4 +18,4 @@ source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
 
 XDG_RUNTIME_DIR=""
 
-python3 -u ./train_ict.py --two-tower
+python3 -u ./train_ict.py --how-many-sentences-to-use 4000000
