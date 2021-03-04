@@ -1,0 +1,21 @@
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
+#SBATCH --partition=gpu --gres=gpu:1
+#SBATCH --mem=32G
+#SBATCH --error=../logs/distilbert-ict.%j.err
+#SBATCH --out=../logs/distilbert-ict.%j.out
+
+module purge
+ml PyTorch/1.7.1-fosscuda-2019b-Python-3.7.4
+
+cd ../src/bert
+source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
+# echo "PYTHONPATH=$PYTHONPATH"
+# echo "PATH=$PATH"
+# echo "PYTHONHOME=$PYTHONHOME"
+# echo "VIRTUAL_ENV=$VIRTUAL_ENV"
+
+XDG_RUNTIME_DIR=""
+
+python3 -u ./train_ict.py --two-tower

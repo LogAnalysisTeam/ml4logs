@@ -37,12 +37,13 @@ def chunkify(examples):
 def run_experiment(config):
     os.environ["WANDB_PROJECT"] = "ICT"
     RUN_NAME = f'{"2T" if config.two_tower else "1T"} T-maxlen {config.target_max_seq_len} C-maxlen {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
+    print(RUN_NAME)
     tokenizer = AutoTokenizer.from_pretrained(config.bert_model, use_fast=True)
     data_collator = DataCollatorForInverseClozeTask(remove_target_from_context_probability=config.remove_target_percentage,
                                                     target_max_seq=config.target_max_seq_len,
                                                     context_max_seq=config.context_max_seq_len)
 
-    hdfs1_dataset = load_dataset('text', data_files='../data/raw/HDFS1/HDFS.log', split='train')
+    hdfs1_dataset = load_dataset('text', data_files='../../data/raw/HDFS1/HDFS.log', split='train')
     cleaned_dataset = hdfs1_dataset.map(remove_timestamp)
     sentence_count, train_contexts, eval_contexts = compute_dataset_sizes(desired_sentence_count=config.how_many_sentences_to_use,
                                                                           dataset_sentence_count=len(cleaned_dataset),
@@ -59,13 +60,13 @@ def run_experiment(config):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
-    training_args = TrainingArguments(output_dir=f"../models/{RUN_NAME.replace(' ', '_')}",
+    training_args = TrainingArguments(output_dir=f"../../models/{RUN_NAME.replace(' ', '_')}",
                                       num_train_epochs=2,
                                       per_device_eval_batch_size=config.eval_batch_size, 
                                       per_device_train_batch_size=config.train_batch_size,
                                       warmup_steps=100,                # number of warmup steps for learning rate scheduler
                                       weight_decay=0.01,               # strength of weight decay
-                                      logging_dir='../logs',            # directory for storing logs
+                                      logging_dir='../../logs',            # directory for storing logs
                                       logging_steps=10,
                                       logging_first_step=True,
                                       eval_steps=50,
