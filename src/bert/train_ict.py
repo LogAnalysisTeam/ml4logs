@@ -63,19 +63,19 @@ def run_experiment(config):
     model = model.to(device)
 
     training_args = TrainingArguments(output_dir=f"../../models/{RUN_NAME.replace(' ', '_')}",
-                                      num_train_epochs=2,
+                                      num_train_epochs=config.epochs,
                                       per_device_eval_batch_size=config.eval_batch_size, 
                                       per_device_train_batch_size=config.train_batch_size,
                                       warmup_steps=100,                # number of warmup steps for learning rate scheduler
                                       weight_decay=0.01,               # strength of weight decay
                                       logging_dir='../../logs',            # directory for storing logs
-                                      logging_steps=10,
+                                      logging_steps=config.logging_steps,
                                       logging_first_step=True,
-                                      eval_steps=400,
+                                      eval_steps=config.eval_steps,
                                       evaluation_strategy='steps',
                                       prediction_loss_only=True,
-                                      save_steps=200,
-                                      save_total_limit=25,
+                                      save_steps=config.save_steps,
+                                      save_total_limit=config.save_total_limit,
                                       label_names=['target', 'context'],
                                       seed=SEED,
                                       run_name=RUN_NAME,
@@ -108,6 +108,10 @@ def main():
     parser.add_argument("--how-many-sentences-to-use", default=1000000, type=int)
     parser.add_argument("--train-batch-size", default=64, type=int)
     parser.add_argument("--epochs", default=3, type=int)
+    parser.add_argument("--logging-steps", default=10, type=int)
+    parser.add_argument("--eval-steps", default=500, type=int)
+    parser.add_argument("--save-steps", default=500, type=int)
+    parser.add_argument("--save-total-limit", default=25, type=int)
     parser.add_argument("--eval-ratio", default=0.2, type=float)
     parser.add_argument("--eval-batch-size", default=64, type=int)
     parser.add_argument("--target-max-seq-len", default=512, type=int)
