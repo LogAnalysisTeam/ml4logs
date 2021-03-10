@@ -2,7 +2,6 @@ from dataclasses import dataclass
 import torch
 from typing import List, Union, Dict
 import numpy as np
-import torch
 from transformers import AutoModel
 
 @dataclass
@@ -11,6 +10,10 @@ class DataCollatorForInverseClozeTask:
     Data Collator to be used with datasets containing contexts (List of senteces, where sentence is a list of tokens, e.g a context is a List of Lists of ints)
     It randomly selects a sentence from each context to serve as a target, and flattens the contexts (with the target sentence randomly removed) into a single sentence to serve as a flat context
     If using huggingface datasets, expects a column named 'chunk'
+    NOTE: This collator is quite slow, if the dataset is really large, consider pre-collating it in advance and saving it, so that the collator can then be as simple as possible
+        (example of how slow it is, when resuming almost finished training on a dataset of 800k contexts (each containing 10 lines, eg 8M lines in total)
+        using batches of size 64, resuming training took over 5 hours on 4 cores, because all the intermediate batches were created by the dataloader and collated by this collater
+        until the Trainer (huggingface) reached the saved step in the checkpoint)
     """
     remove_target_from_context_probability: float = 0.9
     target_max_seq:int = 512

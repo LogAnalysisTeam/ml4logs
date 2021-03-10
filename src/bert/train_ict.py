@@ -88,7 +88,7 @@ def run_experiment(config):
                       eval_dataset=train_test_dataset['test']
                       )
 
-    trainer.train()
+    trainer.train(resume_from_checkpoint=config.checkpoint_directory)
     trainer.save_model()
     
 
@@ -117,6 +117,7 @@ def main():
     parser.add_argument("--target-max-seq-len", default=512, type=int)
     parser.add_argument("--context-max-seq-len", default=512, type=int)
     parser.add_argument("--output-encode-dim", default=512, type=int, help="Output dimension for the encoder towers")
+    parser.add_argument("--checkpoint-directory", default=None, type=str, help="Directory of checkpoint for resuming training")
 
     config = parser.parse_args()
     run_experiment(config)
