@@ -18,4 +18,4 @@ source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
 
 XDG_RUNTIME_DIR=""
 
-python3 -u ./prepare_ict_dataset.py --how-many-contexts-to-use 1100000 --epochs 3 --eval-batch-count 100 --seed 13
+python3 -u ./prepare_ict_dataset.py --how-many-contexts-to-use 1100000 --epochs 3 --eval-batch-count 100 --seed 43

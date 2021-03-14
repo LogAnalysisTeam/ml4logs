@@ -4,6 +4,47 @@ from typing import List, Union, Dict
 import numpy as np
 from transformers import AutoModel
 
+
+def _make_mask(padded_batch, pad_token=0):
+    return (padded_batch != pad_token).to(torch.uint8)
+
+
+def _pad_truncate_add_special_tokens(batch: List[List[int]], max_len, pad_token=0, start_token=101, sep_token=102):
+    sequence_lengths = torch.tensor([min(max_len-2, len(seq)) for seq in batch], dtype=torch.int64)
+    batch_max_len = sequence_lengths.max()
+    padded_batch = torch.full(size=(len(batch), batch_max_len+2), fill_value=pad_token, dtype=torch.int64)
+    padded_batch[:, 0] = start_token
+    for seq_idx, seq in enumerate(batch):
+        padded_batch[seq_idx, 1:sequence_lengths[seq_idx]+1] = torch.tensor(seq[:sequence_lengths[seq_idx]], dtype=torch.int64)
+        padded_batch[seq_idx, sequence_lengths[seq_idx]+1] = sep_token
+    mask = _make_mask(padded_batch)
+    return padded_batch, mask
+
+
+@dataclass
+class DataCollatorForPreprocessedICT:
+    target_max_seq:int = 512
+    context_max_seq:int = 512
+    start_token:int = 101 # [CLS]
+    sep_token:int = 102 # [SEP]
+    pad_token:int = 0
+        
+    def _pad_truncate_add_special_tokens(self, batch: List[List[int]], max_len):
+        return _pad_truncate_add_special_tokens(batch, max_len=max_len, pad_token=self.pad_token, start_token=self.start_token, sep_token=self.sep_token)
+             
+    def __call__(self, contexts: List[Dict[str, List[int]]]):
+        if isinstance(contexts[0], dict):
+            target_sentences = [context_dict['target'] for context_dict in contexts]
+            flattened_contexts = [context_dict['flat_context'] for context_dict in contexts]
+        correct_class = torch.arange(len(target_sentences), dtype=torch.int64)
+        padded_target_batch, padded_target_mask = self._pad_truncate_add_special_tokens(target_sentences, self.target_max_seq)
+        padded_context_batch, padded_context_mask = self._pad_truncate_add_special_tokens(flattened_contexts, self.context_max_seq)
+        return {'target': padded_target_batch,
+                'target_mask': padded_target_mask,
+                'context': padded_context_batch,
+                'context_mask': padded_context_mask,
+                'correct_class': correct_class}
+
 @dataclass
 class DataCollatorForInverseClozeTask:
     """
@@ -22,19 +63,8 @@ class DataCollatorForInverseClozeTask:
     sep_token:int = 102 # [SEP]
     pad_token:int = 0
         
-    def _make_mask(self, padded_batch):
-        return (padded_batch != self.pad_token).astype(np.uint8)
-        
     def _pad_truncate_add_special_tokens(self, batch: List[List[int]], max_len): 
-        sequence_lengths = np.array([min(max_len-2, len(seq)) for seq in batch])
-        batch_max_len = sequence_lengths.max()
-        padded_batch = np.full(shape=(len(batch), batch_max_len+2), fill_value=self.pad_token, dtype=np.int64)
-        padded_batch[:, 0] = self.start_token
-        for seq_idx, seq in enumerate(batch):
-            padded_batch[seq_idx, 1:sequence_lengths[seq_idx]+1] = seq[:sequence_lengths[seq_idx]]
-            padded_batch[seq_idx, sequence_lengths[seq_idx]+1] = self.sep_token
-        mask = self._make_mask(padded_batch)
-        return torch.from_numpy(padded_batch), torch.from_numpy(mask)
+        return _pad_truncate_add_special_tokens(batch, max_len=max_len, pad_token=self.pad_token, start_token=self.start_token, sep_token=self.sep_token)
     
     def _create_target_and_flat_contexts_from_contexts(self, contexts: List[List[List[int]]]):
         # TODO: add sep_token between each sentence when flattening context?
@@ -49,7 +79,7 @@ class DataCollatorForInverseClozeTask:
         if isinstance(contexts[0], dict):
             contexts = [context_dict['chunk'] for context_dict in contexts]
         target_sentences, flattened_contexts = self._create_target_and_flat_contexts_from_contexts(contexts)
-        correct_class = torch.tensor(list(range(len(target_sentences))), dtype=torch.int64)
+        correct_class = torch.arange(len(target_sentences), dtype=torch.int64)
         padded_target_batch, padded_target_mask = self._pad_truncate_add_special_tokens(target_sentences, self.target_max_seq)
         padded_context_batch, padded_context_mask = self._pad_truncate_add_special_tokens(flattened_contexts, self.context_max_seq)
         return {'target': padded_target_batch,
