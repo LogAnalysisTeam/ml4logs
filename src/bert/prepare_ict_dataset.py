@@ -4,6 +4,8 @@ from typing import List
 import numpy as np
 import time
 
+from dataset_utils import prepare_ict
+
 def compute_train_eval_sizes(desired_context_count, dataset_context_count, train_batch_size, eval_batch_size, eval_percentage=0.2, eval_batch_count=None):
     context_count = min(desired_context_count, dataset_context_count)
     batch_count = context_count//train_batch_size
@@ -14,25 +16,6 @@ def compute_train_eval_sizes(desired_context_count, dataset_context_count, train
     train_context_count = ((context_count-eval_context_count)//train_batch_size)*train_batch_size
     final_context_count = eval_context_count+train_context_count
     return train_context_count, eval_context_count
-
-def create_target_and_flat_context(context: List[List[int]], rnd: np.random.Generator, remove_target_prob:float):
-    target_idx = rnd.integers(low=0, high=len(context))
-    remove_target = rnd.random() < remove_target_prob
-    target_sentence = context[target_idx]
-    processed_context = context[:target_idx] + context[target_idx + remove_target:]
-    flattened_context = [token for sentence in context for token in sentence]
-    return target_sentence, flattened_context
-
-def prepare_ict(examples, epochs, rnd: np.random.Generator, remove_target_prob:float):
-    targets = []
-    flat_contexts = []
-    for context in examples['chunk']:
-        for _ in range(epochs):
-            t, f = create_target_and_flat_context(context, rnd, remove_target_prob)
-            targets.append(t)
-            flat_contexts.append(f)
-    return {'target': targets,
-            'flat_context': flat_contexts}
 
 def prepare_dataset(config):
     all_contexts_dataset = load_from_disk('/home/cernypro/dev/source/ml4logs/data/interim/HDFS1_tokenized_chunked_size_10')

@@ -4,6 +4,8 @@ from transformers import AutoTokenizer, Trainer, TrainingArguments
 from ict import DataCollatorForInverseClozeTask, OneTowerICT, TwoTowerICT
 import torch
 
+from dataset_utils import chunkify, remove_timestamp, tokenize_no_special_tokens
+
 SEED = 42
 
 def compute_dataset_sizes(desired_sentence_count, dataset_sentence_count, context_size, train_batch_size, eval_batch_size, eval_percentage=0.2):
@@ -17,22 +19,6 @@ def compute_dataset_sizes(desired_sentence_count, dataset_sentence_count, contex
     final_context_count = eval_context_count+train_context_count
     final_sentence_count = final_context_count*context_size
     return final_sentence_count, train_context_count, eval_context_count
-
-
-def remove_timestamp(example):
-    # need to find third occurence of a space and slice the string after it
-    # using a very non robust silly solution
-    s = example['text']
-    example['text'] = s[s.find(' ', s.find(' ', s.find(' ')+1)+1)+1:]
-    return example
-
-
-def tokenize_no_special_tokens(examples, tokenizer):
-    return {'tokens': tokenizer(examples['text'], add_special_tokens=False, truncation=True, return_attention_mask=False)['input_ids']}
-
-
-def chunkify(examples):
-    return {"chunk": [examples['tokens']]}
 
 
 def run_experiment(config):
