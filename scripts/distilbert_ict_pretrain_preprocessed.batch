@@ -18,12 +18,12 @@ source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
 
 XDG_RUNTIME_DIR=""
 
-TRAINPATH='/home/cernypro/dev/source/ml4logs/data/processed/Tr-1093568_Ev-6400_Epochs-3_Seed-13/train'
-EVALPATH='/home/cernypro/dev/source/ml4logs/data/processed/Tr-1093568_Ev-6400_Epochs-3_Seed-13/eval'
+TRAINPATH='/home/cernypro/dev/source/ml4logs/data/processed/train-data-HDFS1-cv1-1_Epochs-4_Seed-43'
+EVALPATH='/home/cernypro/dev/source/ml4logs/data/processed/val-data-HDFS1-cv1-1_Epochs-1_Seed-43'
 
 mkdir -p /data/temporary/train
 mkdir -p /data/temporary/eval
 cp -R ${TRAINPATH}/* /data/temporary/train
 cp -R ${EVALPATH}/* /data/temporary/eval
 
-python3 -u ./train_ict_preprocessed_data.py --eval-steps 1000 --save-steps 500 --logging-steps 50 --seed 43 --train-dataset /data/temporary/train --eval-dataset /data/temporary/eval
+python3 -u ./train_ict_preprocessed_data.py --two-tower --eval-steps 2000 --save-steps 2000 --logging-steps 50 --dataset-name Martin_basic_chunked_10 --train-dataset /data/temporary/train --eval-dataset /data/temporary/eval

@@ -7,7 +7,8 @@ import torch
 
 def run_experiment(config):
     os.environ["WANDB_PROJECT"] = f"ICT"
-    RUN_NAME = f'{"2T" if config.two_tower else "1T"} Eps {config.epochs} Custom-dataset Seed-{config.seed} T-len {config.target_max_seq_len} C-len {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
+    assert config.dataset_name is not None, "Dataset name must be filled"
+    RUN_NAME = f'{"2T" if config.two_tower else "1T"} Eps {config.epochs} {config.dataset_name} Seed-{config.seed} T-len {config.target_max_seq_len} C-len {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
     print(RUN_NAME)
     tokenizer = AutoTokenizer.from_pretrained(config.bert_model, use_fast=True)
     data_collator = DataCollatorForPreprocessedICT(target_max_seq=config.target_max_seq_len,
@@ -27,7 +28,7 @@ def run_experiment(config):
                                       num_train_epochs=config.epochs,
                                       per_device_eval_batch_size=config.eval_batch_size, 
                                       per_device_train_batch_size=config.train_batch_size,
-                                      warmup_steps=100,                # number of warmup steps for learning rate scheduler
+                                      warmup_steps=1000,                # number of warmup steps for learning rate scheduler
                                       weight_decay=0.01,               # strength of weight decay
                                       logging_dir='../../logs',            # directory for storing logs
                                       logging_steps=config.logging_steps,
@@ -37,6 +38,7 @@ def run_experiment(config):
                                       prediction_loss_only=True,
                                       save_steps=config.save_steps,
                                       save_total_limit=config.save_total_limit,
+                                      dataloader_drop_last=True,
                                       label_names=['target', 'context'],
                                       seed=config.seed,
                                       run_name=RUN_NAME,
@@ -70,6 +72,7 @@ def main():
     parser.add_argument("--output-encode-dim", default=512, type=int, help="Output dimension for the encoder towers")
     parser.add_argument("--checkpoint-directory", default=None, type=str, help="Directory of checkpoint for resuming training")
     parser.add_argument("--seed", default=42, type=int)
+    parser.add_argument("--dataset-name", default=None, type=str)
     parser.add_argument("--train-dataset", default=None, type=str, help="Directory containing the preprocessed training dataset")
     parser.add_argument("--eval-dataset", default=None, type=str, help="Directory containing the preprocessed training dataset")
 
