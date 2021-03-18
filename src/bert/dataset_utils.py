@@ -5,13 +5,42 @@ import re
 HDFS1_TIMESTAMP_PATTERN = re.compile(r'^(\d+) (\d+) (\d+) ')
 
 
-def create_target_and_flat_context(context: List[List[int]], rnd: np.random.Generator, remove_target_prob:float):
+def create_target_and_processed_context(context: List[List[int]], rnd: np.random.Generator, remove_target_prob:float):
     target_idx = rnd.integers(low=0, high=len(context))
     remove_target = rnd.random() < remove_target_prob
     target_sentence = context[target_idx]
     processed_context = context[:target_idx] + context[target_idx + remove_target:]
-    flattened_context = [token for sentence in context for token in sentence]
+    return target_sentence, processed_context
+
+
+def flatten_context_simple(context: List[List[int]]) -> List[int]:
+    return [token for sentence in context for token in sentence]
+
+
+def create_target_and_flat_context(context: List[List[int]], rnd: np.random.Generator, remove_target_prob:float):
+    target_sentence, processed_context = create_target_and_processed_context(context, rnd, remove_target_prob)
+    flattened_context = flatten_context_simple(processed_context)
     return target_sentence, flattened_context
+
+
+def prepare_target_and_context(examples, epochs, rnd: np.random.Generator, remove_target_prob:float):
+    targets = []
+    processed_contexts = []
+    for context in examples['chunk']:
+        for _ in range(epochs):
+            t, c = create_target_and_processed_context(context, rnd, remove_target_prob)
+            targets.append(t)
+            processed_contexts.append(c)
+    return {'target': targets,
+            'context': processed_contexts}
+
+
+def flatten_contexts_wrapper(example):
+    return {'flat_context': flatten_context_simple(example['context'])}
+
+
+def flatten_contexts_batch(examples):
+    return {'flat_context': [flatten_context_simple(context) for context in examples['context']]}
 
 
 def prepare_ict(examples, epochs, rnd: np.random.Generator, remove_target_prob:float):

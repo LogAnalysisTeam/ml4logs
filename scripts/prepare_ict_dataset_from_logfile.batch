@@ -20,4 +20,4 @@ XDG_RUNTIME_DIR=""
 HF_HOME="/data/temporary/huggingface"
 export HF_HOME
 
-python3 -u ./prepare_ict_dataset_from_split.py --epochs 1 --threads $SLURM_CPUS_PER_TASK --dataset-log-file /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/val-data-HDFS1-cv1-1-time-ordered.log
+python3 -u ./prepare_ict_dataset_from_split.py --epochs 1 --threads $SLURM_CPUS_PER_TASK --dataset-log-file /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/val-data-HDFS1-cv1-1.log
