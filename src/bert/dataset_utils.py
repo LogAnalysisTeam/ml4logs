@@ -1,5 +1,8 @@
 import numpy as np
 from typing import List
+import re
+
+HDFS1_TIMESTAMP_PATTERN = re.compile(r'^(\d+) (\d+) (\d+) ')
 
 
 def create_target_and_flat_context(context: List[List[int]], rnd: np.random.Generator, remove_target_prob:float):
@@ -23,11 +26,16 @@ def prepare_ict(examples, epochs, rnd: np.random.Generator, remove_target_prob:f
             'flat_context': flat_contexts}
 
 
-def remove_timestamp(example):
+def remove_timestamp_old(example):
     # need to find third occurence of a space and slice the string after it
     # using a very non robust silly solution
     s = example['text']
     example['text'] = s[s.find(' ', s.find(' ', s.find(' ')+1)+1)+1:]
+    return example
+
+
+def remove_timestamp(example):
+    example['text'] = HDFS1_TIMESTAMP_PATTERN.sub('', example['text'])
     return example
 
 

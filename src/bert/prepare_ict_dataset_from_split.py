@@ -9,6 +9,7 @@ from dataset_utils import prepare_ict, remove_timestamp, chunkify, tokenize_no_s
 
 def prepare_dataset_from_log_file(config):
     assert config.dataset_log_file is not None, "There must be a log file"
+    assert config.threads >= 1, "Threads must be atleast 1"
     raw_dataset_log_path = Path(config.dataset_log_file)
     data_basedir_path = Path(config.data_basedir)
 
@@ -27,7 +28,7 @@ def prepare_dataset_from_log_file(config):
     print("Raw loaded")
 
     print(f'Removing timestamps')
-    cleaned_dataset = raw_dataset.map(remove_timestamp, num_proc=4)
+    cleaned_dataset = raw_dataset.map(remove_timestamp, num_proc=config.threads)
     cleaned_path = interim_path / 'removed_timestamps'
     print(f'Removed, saving to {cleaned_path}')
     cleaned_dataset.save_to_disk(cleaned_path)
@@ -47,7 +48,7 @@ def prepare_dataset_from_log_file(config):
                                              batch_size=config.context_sentence_count,
                                              drop_last_batch=True,
                                              remove_columns=tokenized_dataset.column_names,
-                                             num_proc=4)
+                                             num_proc=config.threads)
     chunked_path = interim_path / f'chunked_size_{config.context_sentence_count}'
     print(f'Chunked, saving to {chunked_path}')
     contexts_dataset.save_to_disk(chunked_path)
@@ -77,6 +78,7 @@ def main():
     parser.add_argument("--seed", default=43, type=int)
     parser.add_argument("--data-basedir", default="/home/cernypro/dev/source/ml4logs/data", type=str)
     parser.add_argument("--dataset-log-file", default=None, type=str)
+    parser.add_argument("--threads", default=1, type=int)
 
     config = parser.parse_args()
     prepare_dataset_from_log_file(config)

@@ -6,7 +6,7 @@ import torch
 
 
 def run_experiment(config):
-    os.environ["WANDB_PROJECT"] = f"ICT"
+    os.environ["WANDB_PROJECT"] = f"ICT" if config.wandb_project is None else config.wandb_project
     assert config.dataset_name is not None, "Dataset name must be filled"
     RUN_NAME = f'{"2T" if config.two_tower else "1T"} Eps {config.epochs} {config.dataset_name} Seed-{config.seed} T-len {config.target_max_seq_len} C-len {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
     print(RUN_NAME)
@@ -75,6 +75,7 @@ def main():
     parser.add_argument("--dataset-name", default=None, type=str)
     parser.add_argument("--train-dataset", default=None, type=str, help="Directory containing the preprocessed training dataset")
     parser.add_argument("--eval-dataset", default=None, type=str, help="Directory containing the preprocessed training dataset")
+    parser.add_argument("--wandb-project", default=None, type=str)
 
     config = parser.parse_args()
     run_experiment(config)

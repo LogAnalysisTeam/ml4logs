@@ -26,4 +26,4 @@ mkdir -p /data/temporary/eval
 cp -R ${TRAINPATH}/* /data/temporary/train
 cp -R ${EVALPATH}/* /data/temporary/eval
 
-python3 -u ./train_ict_preprocessed_data.py --two-tower --eval-steps 2000 --save-steps 2000 --logging-steps 50 --dataset-name Martin_basic_chunked_10 --train-dataset /data/temporary/train --eval-dataset /data/temporary/eval
+python3 -u ./train_ict_preprocessed_data.py --output-encode-dim 100 --eval-steps 5000 --save-steps 2500 --logging-steps 50 --dataset-name Martin_basic_chunked_10 --train-dataset /data/temporary/train --eval-dataset /data/temporary/eval
