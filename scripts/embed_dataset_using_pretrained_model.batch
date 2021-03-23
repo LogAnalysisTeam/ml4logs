@@ -1,0 +1,30 @@
+#!/bin/bash
+#SBATCH --time=4:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=8
+#SBATCH --partition=gpufast --gres=gpu:1
+#SBATCH --mem=32G
+#SBATCH --error=../logs/embed-dataset.%j.err
+#SBATCH --out=../logs/embed-dataset.%j.out
+
+module purge
+ml PyTorch/1.7.1-fosscuda-2019b-Python-3.7.4
+
+cd ../src/bert
+source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
+# echo "PYTHONPATH=$PYTHONPATH"
+# echo "PATH=$PATH"
+# echo "PYTHONHOME=$PYTHONHOME"
+# echo "VIRTUAL_ENV=$VIRTUAL_ENV"
+
+XDG_RUNTIME_DIR=""
+HF_HOME="/data/temporary/huggingface"
+export HF_HOME
+
+python3 -u ./embed_dataset_using_pretrained_model.py \
+         --model-path /home/cernypro/dev/source/ml4logs/models/LogEncoder_from_2T_Eps_1_M_time_ordered_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100 \
+         --threads $SLURM_CPUS_PER_TASK \
+         --input-dataset-log-file /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/train-data-HDFS1-cv1-1.log \
+         --output-parent-folder /home/cernypro/dev/source/ml4logs/data/processed \
+         --batch-size 512 \
+         --remove-hdfs1-timestamp
+
