@@ -14,6 +14,9 @@ known_datasets = {
     'HDFS2': {'url': 'https://zenodo.org/record/3227177/files/HDFS_2.tar.gz?download=1', 'file': 'HDFS_2.tar.gz'},
     'OpenStack': {'url': 'https://zenodo.org/record/3227177/files/OpenStack.tar.gz?download=1', 'file': 'OpenStack.tar.gz'},
     'Thunderbird': {'url': 'https://zenodo.org/record/3227177/files/Thunderbird.tar.gz?download=1', 'file': 'Thunderbird.tar.gz'},
+    'Hadoop': {'url': 'https://zenodo.org/record/3227177/files/Hadoop.tar.gz?download=1', 'file': 'Hadoop.tar.gz'},
+    'Spark': {'url': 'https://zenodo.org/record/3227177/files/Spark.tar.gz?download=1', 'file': 'Spark.tar.gz'},
+    'Zookeeper': {'url': 'https://zenodo.org/record/3227177/files/Zookeeper.tar.gz?download=1', 'file': 'Zookeeper.tar.gz'},
 }
 
 def download(datasets):
