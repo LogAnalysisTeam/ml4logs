@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=8
+#SBATCH --partition=cpu
+#SBATCH --mem=100G
+#SBATCH --error=../logs/pipeline_tokenize_chunk_split_combine.%j.err
+#SBATCH --out=../logs/pipeline_tokenize_chunk_split_combine.%j.out
+
+module purge
+ml PyTorch/1.7.1-fosscuda-2019b-Python-3.7.4
+
+cd ../src/bert
+source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
+
+XDG_RUNTIME_DIR=""
+HF_HOME="/data/temporary/huggingface"
+export HF_HOME
+
+python3 -u ./tokenize_chunkify_train-val-split_combine.py \
+        --val-ratio 0.05 \
+        --output-dir /home/cernypro/dev/source/ml4logs/data/interim/Combined_20210401 \
+        --threads $SLURM_CPUS_PER_TASK

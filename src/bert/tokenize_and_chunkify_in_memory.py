@@ -7,7 +7,7 @@ import numpy as np
 
 from dataset_utils import tokenize_no_special_tokens
 
-def chunkify_in_memory(data: List, chunk_size: int, drop_last_incomplete_chunk:bool = True):
+def chunkify_list_in_memory(data: List, chunk_size: int, drop_last_incomplete_chunk:bool = True):
     chunked = [data[i:i+chunk_size] for i in range(0, len(data), chunk_size)]
     if drop_last_incomplete_chunk and len(chunked[-1]) != chunk_size:
         del chunked[-1]
@@ -54,8 +54,8 @@ def tokenize_and_chunkify(config):
     text_list = tokenized_dataset['text']
     tokens_list = tokenized_dataset['tokens']
     assert len(text_list) == len(tokens_list)
-    text_chunks = chunkify_in_memory(text_list, config.context_sentence_count, drop_last_incomplete_chunk=not config.keep_incomplete_chunk)
-    tokens_chunks = chunkify_in_memory(tokens_list, config.context_sentence_count, drop_last_incomplete_chunk=not config.keep_incomplete_chunk)
+    text_chunks = chunkify_list_in_memory(text_list, config.context_sentence_count, drop_last_incomplete_chunk=not config.keep_incomplete_chunk)
+    tokens_chunks = chunkify_list_in_memory(tokens_list, config.context_sentence_count, drop_last_incomplete_chunk=not config.keep_incomplete_chunk)
     assert len(text_chunks) == len(tokens_chunks)
 
     del tokenized_dataset
