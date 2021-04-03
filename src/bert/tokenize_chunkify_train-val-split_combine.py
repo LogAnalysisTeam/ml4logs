@@ -72,7 +72,7 @@ def tokenize_chunkify_split_combine_pipeline(config):
     train_datasets = {name: ds_dict['train'] for name, ds_dict in train_val_splits_datasets.items()}
     val_datasets = {name: ds_dict['val'] for name, ds_dict in train_val_splits_datasets.items()}
 
-    combined_base_path = output_dir_path / f'shuffled_seed-{config.seed}'
+    combined_base_path = output_dir_path / f'source_text_tokens_chunks_shuffled_seed-{config.seed}'
     train_path = combined_base_path / 'train'
     val_path = combined_base_path / 'val'
 

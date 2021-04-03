@@ -1,12 +1,12 @@
 from datasets import load_from_disk, Dataset, concatenate_datasets
 from pathlib import Path
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Tuple
 from transformers import AutoTokenizer
 import logging
 from time import time
 import numpy as np
 
-from dataset_utils import tokenize_no_special_tokens
+from dataset_utils import tokenize_no_special_tokens, prepare_target_and_context_from_chunk_indices
 
 log = logging.getLogger(__name__)
 
@@ -174,3 +174,74 @@ def combine_datasets(datasets: Dict[str, Dataset],
             combined_ds.save_to_disk(output_path)
         log.info(f"Combining time taken: {time() - start}")
     return combined_ds
+
+
+def prepare_targets_contexts_dataset(ds: Dataset,
+                                     output_ds_basedir: Path,
+                                     epochs: int,
+                                     seed: int,
+                                     remove_target_prob: float,
+                                     chunk_target_context_columns: List[Tuple[str, str, str]] = None,
+                                     num_proc: Optional[int] = None,
+                                     save_dataset: bool=True) -> Dataset:
+    """
+    Assumes epochs is smaller than the chunk size and that all chunks are the same size
+    """
+    if chunk_target_context_columns is None:
+        chunk_target_context_columns = [('chunk', 'target', 'context')]
+    output_path = output_ds_basedir / f'targets_contexts_non_flat_epochs-{epochs}_seed-{seed}'
+    log.info(f'Creating targets and contexts to {output_path}')
+    start = time()
+    try:
+        output_ds = load_from_disk(output_path)
+        log.info(f'Cached targets contexts found')
+    except FileNotFoundError as e:
+        chunk_size = len(ds[0][chunk_target_context_columns[0][0]])  # assumes all chunks same size
+        chunk_count = len(ds)
+        rnd = np.random.default_rng(seed=seed)
+        target_indices_per_chunk = [rnd.choice(chunk_size, replace=False, size=epochs, shuffle=False) for _ in range(chunk_count)]
+        remove_target_per_chunk = rnd.random(size=(chunk_count, epochs)) < remove_target_prob
+        output_ds = ds.map(function=prepare_target_and_context_from_chunk_indices,
+                           with_indices=True,
+                           fn_kwargs={
+                               'target_indices_per_chunk': target_indices_per_chunk,
+                               'remove_target_per_chunk' : remove_target_per_chunk,
+                               'chunk_target_context_columns': chunk_target_context_columns
+                           },
+                           batched=True,
+                           batch_size=1000,
+                           writer_batch_size=10000,
+                           remove_columns=ds.column_names,
+                           num_proc=num_proc)
+        if save_dataset:
+            log.info(f"Time taken so far: {time() - start}s, Saving to {output_path}")
+            output_ds.save_to_disk(output_path)
+    log.info(f'Creating targets contexts time taken: {time() - start}s')
+    return output_ds
+
+
+def flatten_contexts_in_dataset(ds: Dataset,
+                                output_ds_basedir: Path,
+                                flatten_truncate_batch_map_function,
+                                truncation_type: str,
+                                num_proc: Optional[int] = None,
+                                keep_columns: Optional[List[str]] = None,
+                                save_dataset: bool=True) -> Dataset:
+    output_path = output_ds_basedir / f'flattened_contexts_truncation-{truncation_type.replace(" ", "_")}'
+    log.info(f'Flattening with {truncation_type} truncation to {output_path}')
+    start = time()
+    try:
+        output_ds = load_from_disk(output_path)
+        log.info(f'Cached flattened truncated found')
+    except FileNotFoundError as e:
+        if keep_columns is not None:
+            keep_columns = set(keep_columns)
+        remove_columns = None if keep_columns is None else [column for column in ds.column_names if column not in keep_columns]
+        output_ds = ds.map(function=flatten_truncate_batch_map_function,
+                           batched=True,
+                           writer_batch_size=10000,
+                           remove_columns=remove_columns,
+                           num_proc=num_proc)
+        if save_dataset:
+            log.info(f'Time taken so far: {time() - start}s, saving to {output_path}')
+            output_ds.save_to_disk(output_path)
