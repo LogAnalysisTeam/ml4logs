@@ -8,7 +8,7 @@ import torch
 def run_experiment(config):
     os.environ["WANDB_PROJECT"] = f"ICT" if config.wandb_project is None else config.wandb_project
     assert config.dataset_name is not None, "Dataset name must be filled"
-    RUN_NAME = f'{"2T" if config.two_tower else "1T"} Eps {config.epochs} {config.dataset_name} Seed-{config.seed} T-len {config.target_max_seq_len} C-len {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
+    RUN_NAME = f'{"2T" if config.two_tower else "1T"} {"fp16" if config.fp16 else ""} Eps {config.epochs} {config.dataset_name} Seed-{config.seed} T-len {config.target_max_seq_len} C-len {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
     print(RUN_NAME)
     tokenizer = AutoTokenizer.from_pretrained(config.bert_model, use_fast=True)
     data_collator = DataCollatorForPreprocessedICT(target_max_seq=config.target_max_seq_len,
@@ -25,6 +25,7 @@ def run_experiment(config):
     model = model.to(device)
 
     training_args = TrainingArguments(output_dir=f"../../models/{RUN_NAME.replace(' ', '_')}",
+                                      fp16=config.fp16,
                                       num_train_epochs=config.epochs,
                                       per_device_eval_batch_size=config.eval_batch_size, 
                                       per_device_train_batch_size=config.train_batch_size,
@@ -59,6 +60,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="Runner for ICT experiments")
     parser.add_argument('--two-tower', default=False, action='store_true', help="Use TwoTowerICT")
+    parser.add_argument('--fp16', default=False, action='store_true', help="Use half-precision")
     parser.add_argument('--bert-model', default="distilbert-base-cased", type=str, help="Pretrained Transformer for the encoder towers.")
     parser.add_argument("--train-batch-size", default=64, type=int)
     parser.add_argument("--epochs", default=1, type=int)

@@ -72,6 +72,16 @@ def compute_mean_truncate_lengths(lenghts: List[int], max_length:int) -> List[in
         return [min(length, avg_len) for length in lenghts]
 
 
+def compute_concat_to_max_len_truncate_lengths(lenghts: List[int], max_length: int) -> List[int]:
+    if sum(lenghts) <= max_length:
+        return lenghts
+    else:
+        np_lengths = np.array(lenghts)
+        need_to_remove = np.maximum(np.cumsum(np_lengths) - max_length, 0)
+        new_lengths = np.maximum(np_lengths - need_to_remove, 0)
+        return new_lengths.tolist()
+
+
 def flatten_truncate_function_creator(truncate_lengths_function):
     def flatten_truncate(context: List[List[int]], max_length: int) -> List[int]:
         sentence_lenghts = [len(sentence) for sentence in context]
