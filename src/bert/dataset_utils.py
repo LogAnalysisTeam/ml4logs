@@ -1,8 +1,21 @@
 import numpy as np
-from typing import List, Tuple, Any
+from typing import List, Tuple, Any, Dict
 import re
+from pathlib import Path
+from collections import defaultdict
+
 
 HDFS1_TIMESTAMP_PATTERN = re.compile(r'^(\d+) (\d+) (\d+) ')
+HDFS1_BLK_ID_PATTERN = re.compile(r'(blk_-?\d+)')
+
+
+def load_hdfs1_log_file_grouped(log_path: Path) -> Dict:
+    blocks = defaultdict(list)
+    with log_path.open(mode='r') as f:
+        for line in f:
+            block_id = HDFS1_BLK_ID_PATTERN.search(line).group()
+            blocks[block_id].append(line)
+    return blocks
 
 
 def create_target_and_processed_context_deterministic(context: List[Any], target_idx: int, remove_target: bool):

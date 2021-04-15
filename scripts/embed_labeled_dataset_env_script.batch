@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --time=4:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
+#SBATCH --partition=gpufast --gres=gpu:1
+#SBATCH --mem=32G
+#SBATCH --error=../logs/embed-labeled-dataset.%j.err
+#SBATCH --out=../logs/embed-labeled-dataset.%j.out
+
+module purge
+ml PyTorch/1.7.1-fosscuda-2019b-Python-3.7.4
+
+cd ../src/bert
+source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
+# echo "PYTHONPATH=$PYTHONPATH"
+# echo "PATH=$PATH"
+# echo "PYTHONHOME=$PYTHONHOME"
+# echo "VIRTUAL_ENV=$VIRTUAL_ENV"
+
+XDG_RUNTIME_DIR=""
+HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
+export HF_HOME
+
+python3 -u ./embed_labeled_dataset_for_anomaly_detection.py \
+         --model-path $MODEL_PATH \
+         --input-dataset-log-file $LOGFILE_PATH \
+         --input-dataset-labels-csv $LABEL_CSV_PATH \
+         --output-parent-folder /home/cernypro/dev/source/ml4logs/data/interim
+
