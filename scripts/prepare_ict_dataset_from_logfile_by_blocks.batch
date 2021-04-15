@@ -17,7 +17,7 @@ source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
 # echo "VIRTUAL_ENV=$VIRTUAL_ENV"
 
 XDG_RUNTIME_DIR=""
-HF_HOME="/data/temporary/huggingface"
+HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
 export HF_HOME
 
 python3 -u ./prepare_ict_dataset_from_split_contexts_by_blockid.py --seed 13 --epochs 4 --threads $SLURM_CPUS_PER_TASK --dataset-log-file /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/train-data-HDFS1-cv1-1.log --tokenized-chunked-dataset-checkpoint /home/cernypro/dev/source/ml4logs/data/interim/train-data-HDFS1-cv1-1/tokenized_chunked_by_block_ids_min3_max10

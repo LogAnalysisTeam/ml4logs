@@ -17,7 +17,7 @@ source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
 # echo "VIRTUAL_ENV=$VIRTUAL_ENV"
 
 XDG_RUNTIME_DIR=""
-HF_HOME="/data/temporary/huggingface"
+HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
 export HF_HOME
 
 python3 -u ./embed_dataset_using_pretrained_model.py \

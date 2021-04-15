@@ -13,7 +13,7 @@ cd ../src/bert
 source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
 
 XDG_RUNTIME_DIR=""
-HF_HOME="/data/temporary/huggingface"
+HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
 export HF_HOME
 
 python3 -u ./tokenize_chunkify_train-val-split_combine.py \
