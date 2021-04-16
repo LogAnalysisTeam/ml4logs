@@ -1,7 +1,7 @@
 #
 # Original work at: https://github.com/LogAnalysisTeam/methods4logfiles/blob/main/src/models/metrics.py
 #
-#
+# Modified for the purposes of Contextual Embeddings for Anomaly Detection in Logs thesis
 #
 #
 
@@ -41,17 +41,24 @@ def get_metrics(y_true: np.array, y_pred: np.array, **kwargs) -> Dict:
 
 
 def metrics_report(y_true: np.array, y_pred: np.array, **kwargs):
+    report = {
+        'precision': precision(y_true, y_pred, **kwargs),
+        'recall': recall(y_true, y_pred, **kwargs),
+        'f1_score': f1_score(y_true, y_pred, **kwargs),
+        'mcc_score': mcc_score(y_true, y_pred, **kwargs)
+    }
     print('+----------------------------------+-----------+')
     print('| Metric                           | Score     |')
     print('+----------------------------------+-----------+')
-    print(f'| Precision                        | {precision(y_true, y_pred, **kwargs):.5f}   |')
+    print(f'| Precision                        | {report["precision"]:.5f}   |')
     print('+----------------------------------+-----------+')
-    print(f'| Recall                           | {recall(y_true, y_pred, **kwargs):.5f}   |')
+    print(f'| Recall                           | {report["recall"]:.5f}   |')
     print('+----------------------------------+-----------+')
-    print(f'| F1 Score                         | {f1_score(y_true, y_pred, **kwargs):.5f}   |')
+    print(f'| F1 Score                         | {report["f1_score"]:.5f}   |')
     print('+----------------------------------+-----------+')
-    print(f'| Matthews Correlation Coefficient | {mcc_score(y_true, y_pred, **kwargs):.5f}   |')
+    print(f'| Matthews Correlation Coefficient | {report["mcc_score"]:.5f}   |')
     print('+----------------------------------+-----------+')
+    return report
 
 
 if __name__ == '__main__':

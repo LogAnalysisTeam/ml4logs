@@ -16,9 +16,9 @@ from tqdm import tqdm
 from typing import List, Callable
 import sys
 
-from .utils import time_decorator
-from .tcnn import TemporalConvNet
-from .datasets import CroppedDataset1D, EmbeddingDataset
+from utils import time_decorator
+from tcnn import TemporalConvNet
+from datasets import CroppedDataset1D, EmbeddingDataset
 
 SEED = 160121
 
