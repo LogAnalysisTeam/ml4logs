@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --time=4:00:00
-#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=8
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
 #SBATCH --partition=gpufast --gres=gpu:1
 #SBATCH --mem=32G
 #SBATCH --error=../logs/embed-labeled-dataset.%j.err
@@ -21,7 +21,7 @@ HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
 export HF_HOME
 
 python3 -u ./embed_labeled_dataset_for_anomaly_detection.py \
-         --model-path /home/cernypro/dev/source/ml4logs/models/LogEncoder_from_2T_Eps_1_M_time_ordered_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100 \
-         --input-dataset-log-file /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/no_timestamps_train-data-HDFS1-cv1-1.log \
-         --input-dataset-labels-csv /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/train-labels-HDFS1-cv1-1.csv \
+         --model-path /home/cernypro/dev/source/ml4logs/models/LogEncoder_from_2T__Eps_1_Combined_20210401_uniform_3_epochs_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100 \
+         --input-dataset-log-file /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/no_timestamps_test-data-HDFS1.log \
+         --input-dataset-labels-csv /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/test-labels-HDFS1.csv \
          --output-parent-folder /home/cernypro/dev/source/ml4logs/data/interim

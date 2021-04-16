@@ -1,4 +1,4 @@
-from datasets import load_from_disk, Dataset, concatenate_datasets
+from datasets import Dataset, concatenate_datasets
 from pathlib import Path
 from typing import Optional, Dict, List, Any, Tuple
 from transformers import AutoTokenizer
@@ -6,7 +6,7 @@ import logging
 from time import time
 import numpy as np
 
-from dataset_utils import tokenize_no_special_tokens, prepare_target_and_context_from_chunk_indices
+from dataset_utils import tokenize_no_special_tokens, prepare_target_and_context_from_chunk_indices, my_caching_load_from_disk
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ def tokenize_dataset(ds: Dataset,
     log.info(f'Tokenizing dataset to {output_path}')
     start = time()
     try:
-        output_ds = load_from_disk(output_path)
+        output_ds = my_caching_load_from_disk(output_path)
     except FileNotFoundError as e:
         log.info(f"No tokenized cache found, computing")
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_bert_model)
@@ -120,8 +120,8 @@ def chunkify_train_val_split(ds: Dataset,
     train_path = output_basepath / 'train'
     val_path = output_basepath / 'val'
     try:
-        train_ds = load_from_disk(train_path)
-        val_ds = load_from_disk(val_path)
+        train_ds = my_caching_load_from_disk(train_path)
+        val_ds = my_caching_load_from_disk(val_path)
     except FileNotFoundError as e:
         chunked_dict = chunkify_dataset_in_memory_return_dict(ds, chunk_size)
         train_val_split_dict = train_val_split_in_memory_dict(chunked_dict, desired_total_chunks_taken, val_ratio,
@@ -161,7 +161,7 @@ def combine_datasets(datasets: Dict[str, Dataset],
                      seed: int,
                      save_dataset: bool=True):
     try:
-        combined_ds = load_from_disk(output_path)
+        combined_ds = my_caching_load_from_disk(output_path)
     except FileNotFoundError as e:
         log.info(f"Concatenating datasets")
         start = time()
@@ -193,7 +193,7 @@ def prepare_targets_contexts_dataset(ds: Dataset,
     log.info(f'Creating targets and contexts to {output_path}')
     start = time()
     try:
-        output_ds = load_from_disk(output_path)
+        output_ds = my_caching_load_from_disk(output_path)
         log.info(f'Cached targets contexts found')
     except FileNotFoundError as e:
         chunk_size = len(ds[0][chunk_target_context_columns[0][0]])  # assumes all chunks same size
@@ -231,7 +231,7 @@ def flatten_contexts_in_dataset(ds: Dataset,
     log.info(f'Flattening with {truncation_type} truncation to {output_path}')
     start = time()
     try:
-        output_ds = load_from_disk(output_path)
+        output_ds = my_caching_load_from_disk(output_path)
         log.info(f'Cached flattened truncated found')
     except FileNotFoundError as e:
         if keep_columns is not None:

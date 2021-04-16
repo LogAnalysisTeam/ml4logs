@@ -3,10 +3,30 @@ from typing import List, Tuple, Any, Dict
 import re
 from pathlib import Path
 from collections import defaultdict
+import shutil
+
+from datasets import config as datasets_config
+from datasets import load_from_disk, fingerprint
 
 
 HDFS1_TIMESTAMP_PATTERN = re.compile(r'^(\d+) (\d+) (\d+) ')
 HDFS1_BLK_ID_PATTERN = re.compile(r'(blk_-?\d+)')
+
+
+def my_caching_load_from_disk(path):
+    ds_info_path = path / "dataset_info.json"
+    state_path = path / "state.json"
+    arrow_files = list(path.glob("*.arrow"))
+    if ds_info_path.exists() and state_path.exists() and arrow_files:
+        temp_dir_path = datasets_config.HF_DATASETS_CACHE / "tmp_datasets" / f'{path.stem}_{fingerprint.generate_random_fingerprint()}'
+        temp_dir_path.mkdir(parents=True, exist_ok=False)
+        files_to_copy = [ds_info_path, state_path] + arrow_files
+        for file_path in files_to_copy:
+            shutil.copy2(file_path, temp_dir_path)
+        return load_from_disk(temp_dir_path)
+    else:
+        # Will throw error, but use huggingface load to throw good FileNotFoundError
+        return load_from_disk(path)
 
 
 def load_hdfs1_log_file_grouped(log_path: Path) -> Dict:

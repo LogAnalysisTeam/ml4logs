@@ -17,9 +17,8 @@ HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
 export HF_HOME
 
 python3 -u ./prepare_ict_dataset_from_chunks.py \
-    --epochs 3 \
+    --epochs 5 \
     --seed 43 \
     --dataset /home/cernypro/dev/source/ml4logs/data/interim/Combined_20210401/source_text_tokens_chunks_shuffled_seed-43/train \
-    --output-basedir /home/cernypro/dev/source/ml4logs/data/interim/Combined_20210401/train_uniform \
-    --threads $SLURM_CPUS_PER_TASK \
-    --uniform-truncation
+    --output-basedir /home/cernypro/dev/source/ml4logs/data/interim/Combined_20210401/train_5_epochs_max_avg \
+    --threads $SLURM_CPUS_PER_TASK 

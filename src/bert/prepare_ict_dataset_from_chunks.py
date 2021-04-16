@@ -1,4 +1,3 @@
-from datasets import load_dataset, load_from_disk
 from pathlib import Path
 from typing import List
 import numpy as np
@@ -9,7 +8,7 @@ import logging
 import os
 
 from dataset_pipeline import prepare_targets_contexts_dataset, flatten_contexts_in_dataset
-from dataset_utils import flatten_truncate_batch_map_wrapper, flatten_truncate_function_creator, compute_mean_truncate_lengths
+from dataset_utils import flatten_truncate_batch_map_wrapper, flatten_truncate_function_creator, compute_mean_truncate_lengths, my_caching_load_from_disk
 from milp_dataset_utils import compute_uniform_truncate_lenghts
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
@@ -26,7 +25,7 @@ def prepare_dataset_from_chunks(config):
     log.info(NAME)
     log.info(config)
 
-    chunks_ds = load_from_disk(chunked_dataset_path)
+    chunks_ds = my_caching_load_from_disk(chunked_dataset_path)
 
     chunk_target_context_columns = [
         ('chunk_text', "target_text", "context_text"),
