@@ -8,7 +8,7 @@ import torch
 def run_experiment(config):
     os.environ["WANDB_PROJECT"] = f"ICT" if config.wandb_project is None else config.wandb_project
     assert config.dataset_name is not None, "Dataset name must be filled"
-    RUN_NAME = f'{"2T" if config.two_tower else "1T"} {"fp16" if config.fp16 else ""} Eps {config.epochs} {config.dataset_name} Seed-{config.seed} T-len {config.target_max_seq_len} C-len {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
+    RUN_NAME = f'{"2T" if config.two_tower else "1T"}{" fp16" if config.fp16 else " "} Eps {config.epochs} {config.dataset_name} Seed-{config.seed} T-len {config.target_max_seq_len} C-len {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
     print(RUN_NAME)
     tokenizer = AutoTokenizer.from_pretrained(config.bert_model, use_fast=True)
     data_collator = DataCollatorForPreprocessedICT(target_max_seq=config.target_max_seq_len,
@@ -54,12 +54,13 @@ def run_experiment(config):
 
     trainer.train(resume_from_checkpoint=config.checkpoint_directory)
     trainer.save_model()
+    model.save_encoder(RUN_NAME.replace(' ', '_'), Path('../../models/'))
     
 
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Runner for ICT experiments")
-    parser.add_argument('--two-tower', default=False, action='store_true', help="Use TwoTowerICT")
+    parser.add_argument('--two-tower', default=0, type=int, help="Use TwoTowerICT, use int values, 0 for false, 1 for true")
     parser.add_argument('--fp16', default=False, action='store_true', help="Use half-precision")
     parser.add_argument('--bert-model', default="distilbert-base-cased", type=str, help="Pretrained Transformer for the encoder towers.")
     parser.add_argument("--train-batch-size", default=64, type=int)
@@ -71,7 +72,7 @@ def main():
     parser.add_argument("--eval-batch-size", default=64, type=int)
     parser.add_argument("--target-max-seq-len", default=512, type=int)
     parser.add_argument("--context-max-seq-len", default=512, type=int)
-    parser.add_argument("--output-encode-dim", default=512, type=int, help="Output dimension for the encoder towers")
+    parser.add_argument("--output-encode-dim", default=100, type=int, help="Output dimension for the encoder towers")
     parser.add_argument("--checkpoint-directory", default=None, type=str, help="Directory of checkpoint for resuming training")
     parser.add_argument("--seed", default=42, type=int)
     parser.add_argument("--dataset-name", default=None, type=str)

@@ -4,6 +4,10 @@ from typing import List, Union, Dict
 import numpy as np
 from transformers import AutoModel
 
+from pathlib import Path
+
+from encoders import DistilBertForClsEmbedding
+
 
 def _make_mask(padded_batch, pad_token=0):
     return (padded_batch != pad_token).to(torch.uint8)
@@ -113,15 +117,22 @@ class OneTowerICT(torch.nn.Module):
     """
     def __init__(self, pretrained_model_name_or_path, output_encode_dimension=512):
         super(OneTowerICT, self).__init__()
-        self.tower = ClsEncoderTower(pretrained_model_name_or_path, output_encode_dimension)
+        self.tower = DistilBertForClsEmbedding.from_pretrained(pretrained_model_name_or_path,
+                                                               task_specific_params={'cls_embedding_dimension': output_encode_dimension})
         self.loss_fn = torch.nn.CrossEntropyLoss()
     def forward(self, target, target_mask, context, context_mask, correct_class):
-        target_cls_encode = self.tower(input_ids=target, attention_mask=target_mask)
-        context_cls_encode = self.tower(input_ids=context, attention_mask=context_mask)
+        target_cls_encode = self.tower(input_ids=target, attention_mask=target_mask).embedding
+        context_cls_encode = self.tower(input_ids=context, attention_mask=context_mask).embedding
         
         logits = torch.matmul(target_cls_encode, context_cls_encode.transpose(-2, -1))
         loss = self.loss_fn(logits, correct_class)
         return loss, target_cls_encode, context_cls_encode
+
+    def save_encoder(self, name: str, basedir: Path):
+        encoder_name = f'LogEncoder_from_{name.replace(' ', '_')}'
+        encoder_path = basedir / encoder_name
+        self.tower.save_pretrained(encoder_path)
+
 
 
 class TwoTowerICT(torch.nn.Module):
@@ -130,14 +141,22 @@ class TwoTowerICT(torch.nn.Module):
         assert target_tower_pretrained_model_name_or_path is not None, "Target tower pretrained model must me specified!"
         if context_tower_pretrained_model_name_or_path is None:
             context_tower_pretrained_model_name_or_path = target_tower_pretrained_model_name_or_path
-        self.target_encoder = ClsEncoderTower(target_tower_pretrained_model_name_or_path, output_encode_dimension)
-        self.context_encoder = ClsEncoderTower(context_tower_pretrained_model_name_or_path, output_encode_dimension)
+        self.target_encoder = DistilBertForClsEmbedding.from_pretrained(target_tower_pretrained_model_name_or_path, task_specific_params={'cls_embedding_dimension': output_encode_dimension})
+        self.context_encoder = DistilBertForClsEmbedding.from_pretrained(context_tower_pretrained_model_name_or_path, task_specific_params={'cls_embedding_dimension': output_encode_dimension})
         self.loss_fn = torch.nn.CrossEntropyLoss()
     
     def forward(self, target, target_mask, context, context_mask, correct_class):
-        target_cls_encode = self.target_encoder(input_ids=target, attention_mask=target_mask)
-        context_cls_encode = self.context_encoder(input_ids=context, attention_mask=context_mask)
+        target_cls_encode = self.target_encoder(input_ids=target, attention_mask=target_mask).embedding
+        context_cls_encode = self.context_encoder(input_ids=context, attention_mask=context_mask).embedding
         
         logits = torch.matmul(target_cls_encode, context_cls_encode.transpose(-2, -1))
         loss = self.loss_fn(logits, correct_class)
         return loss, target_cls_encode, context_cls_encode
+
+    def save_encoder(self, name: str, basedir: Path):
+        encoder_name = f'LogEncoder_from_{name.replace(' ', '_')}'
+        encoder_path = basedir / encoder_name
+        self.target_encoder.save_pretrained(encoder_path)
+        context_encoder_name = f'ContextEncoder_from_{name.replace(' ', '_')}'
+        context_encoder_path = basedir / context_encoder_name
+        self.context_encoder.save_pretrained(context_encoder_path)
