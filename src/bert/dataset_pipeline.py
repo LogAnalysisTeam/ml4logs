@@ -1,4 +1,4 @@
-from datasets import Dataset, concatenate_datasets
+from datasets import Dataset, concatenate_datasets, Value, Sequence, Features
 from pathlib import Path
 from typing import Optional, Dict, List, Any, Tuple
 from transformers import AutoTokenizer
@@ -30,11 +30,14 @@ def tokenize_dataset(ds: Dataset,
     except FileNotFoundError as e:
         log.info(f"No tokenized cache found, computing")
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_bert_model)
+        new_features = ds.features.copy()
+        new_features['tokens'] = Sequence(Value('int32'))
         output_ds = ds.map(tokenize_no_special_tokens, 
                            fn_kwargs={'tokenizer': tokenizer}, 
                            batched=True, 
                            batch_size=100000, 
-                           writer_batch_size=10000)
+                           writer_batch_size=10000,
+                           features=new_features)
         if save_dataset:
             log.info(f"Saving tokenized, time taken so far: {time() - start}s, saving to {output_path}")
             output_ds.save_to_disk(output_path)
@@ -94,11 +97,12 @@ def train_val_split_in_memory_dict(in_memory_data: Dict[str, List[Any]],
 
 def create_dataset_from_in_memory_dict(in_memory_data: Dict[str, List[Any]], 
                                        output_path: Path,
+                                       features: Optional[Features] = None,
                                        save_dataset: bool=True) -> Dataset:
     log.info(f'Creating dataset from in memory dict to {output_path}')
     start = time()
     in_memory_ds = Dataset.from_dict(in_memory_data)
-    on_disk_ds = in_memory_ds.map(function=None, writer_batch_size=50000, batched=True, batch_size=5000)
+    on_disk_ds = in_memory_ds.map(function=None, writer_batch_size=50000, batched=True, batch_size=5000, features=features)
     log.info(f'In memory dict mapped to on disk time taken so far: {time() - start}s{f", saving to {output_path}" if save_dataset else ""}')
     if save_dataset:
         on_disk_ds.save_to_disk(output_path)
@@ -127,8 +131,12 @@ def chunkify_train_val_split(ds: Dataset,
         train_val_split_dict = train_val_split_in_memory_dict(chunked_dict, desired_total_chunks_taken, val_ratio,
                                                               rnd=np.random.default_rng(seed=seed))
         del chunked_dict
-        train_ds = create_dataset_from_in_memory_dict(train_val_split_dict['train'], train_path, save_dataset=save_dataset)
-        val_ds = create_dataset_from_in_memory_dict(train_val_split_dict['val'], val_path, save_dataset=save_dataset)
+        features = Features({
+            'chunk_text': Sequence(Value('string')),
+            'chunk_tokens': Sequence(Sequence(Value('int32')))
+            })
+        train_ds = create_dataset_from_in_memory_dict(train_val_split_dict['train'], train_path, save_dataset=save_dataset, features=features.copy())
+        val_ds = create_dataset_from_in_memory_dict(train_val_split_dict['val'], val_path, save_dataset=save_dataset, features=features.copy())
         del train_val_split_dict
     log.info(f"Chunking and splitting done, time taken: {time() - start}s")
     return {'train': train_ds,
@@ -183,6 +191,7 @@ def prepare_targets_contexts_dataset(ds: Dataset,
                                      remove_target_prob: float,
                                      chunk_target_context_columns: List[Tuple[str, str, str]] = None,
                                      num_proc: Optional[int] = None,
+                                     features: Optional[Features] = None,
                                      save_dataset: bool=True) -> Dataset:
     """
     Assumes epochs is smaller than the chunk size and that all chunks are the same size
@@ -212,7 +221,8 @@ def prepare_targets_contexts_dataset(ds: Dataset,
                            batch_size=1000,
                            writer_batch_size=10000,
                            remove_columns=ds.column_names,
-                           num_proc=num_proc)
+                           num_proc=num_proc,
+                           features=features)
         if save_dataset:
             log.info(f"Time taken so far: {time() - start}s, Saving to {output_path}")
             output_ds.save_to_disk(output_path)
@@ -224,10 +234,12 @@ def flatten_contexts_in_dataset(ds: Dataset,
                                 output_ds_basedir: Path,
                                 flatten_truncate_batch_map_function,
                                 truncation_type: str,
+                                additional_info_to_dir_name: Optional[str] = None,
                                 num_proc: Optional[int] = None,
                                 keep_columns: Optional[List[str]] = None,
-                                save_dataset: bool=True) -> Dataset:
-    output_path = output_ds_basedir / f'flattened_contexts_truncation-{truncation_type.replace(" ", "_")}'
+                                save_dataset: bool=True,
+                                features: Optional[Features] = None) -> Dataset:
+    output_path = output_ds_basedir / f'flattened_contexts{"" if additional_info_to_dir_name is None else f"_{additional_info_to_dir_name}"}_truncation-{truncation_type.replace(" ", "_")}'
     log.info(f'Flattening with {truncation_type} truncation to {output_path}')
     start = time()
     try:
@@ -241,7 +253,8 @@ def flatten_contexts_in_dataset(ds: Dataset,
                            batched=True,
                            writer_batch_size=10000,
                            remove_columns=remove_columns,
-                           num_proc=num_proc)
+                           num_proc=num_proc,
+                           features=features)
         if save_dataset:
             log.info(f'Time taken so far: {time() - start}s, saving to {output_path}')
             output_ds.save_to_disk(output_path)

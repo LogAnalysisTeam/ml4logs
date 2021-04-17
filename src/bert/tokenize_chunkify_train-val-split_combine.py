@@ -80,7 +80,7 @@ def tokenize_chunkify_split_combine_pipeline(config):
     combined_train_ds = combine_datasets(train_datasets, output_path=train_path, seed=config.seed, save_dataset=True)
     
     log.info(f'Combining validation datasets to {val_path}')
-    combined_train_ds = combine_datasets(val_datasets, output_path=val_path, seed=config.seed, save_dataset=True)
+    combined_val_ds = combine_datasets(val_datasets, output_path=val_path, seed=config.seed, save_dataset=True)
 
     split_sizes = {name: {'train': len(train_datasets[name]), 'val': len(val_datasets[name])} for name in used_dataset_str_paths.keys()}
     actual_contexts_counts = {name: sum(split.values()) for name, split in split_sizes.items()}

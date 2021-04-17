@@ -105,6 +105,30 @@ def compute_mean_truncate_lengths(lenghts: List[int], max_length:int) -> List[in
         return [min(length, avg_len) for length in lenghts]
 
 
+def compute_smart_mean_truncate_lengths(lengths: List[int], max_length: int) -> List[int]:
+    if sum(lengths) <= max_length:
+        return lengths
+    else:
+        np_lengths = np.array(lengths)
+        prev_thresh = -1
+        cur_thresh = max_length//len(lengths)
+        while cur_thresh != prev_thresh:
+            #  find the highest threshold such that the sets of list lengths smaller than it and bigger than it don't change
+            prev_thresh = cur_thresh
+            mask_where_slack = (np_lengths < cur_thresh) # find positions where length smaller than threshold
+            non_slack_truncate = (max_length-np_lengths[mask_where_slack].sum())//(~mask_where_slack).sum() # compute truncation lengths only for positions greater than current threshold, distributing them to fit (max_length - sum(length of lists shorter than current threshold))
+            cur_thresh = non_slack_truncate
+        intermediate_lengths = np_lengths.copy()
+        intermediate_lengths[~mask_where_slack] = np.minimum(np_lengths[~mask_where_slack], non_slack_truncate)
+        safe_to_add = (max_length-np_lengths[mask_where_slack].sum())%(~mask_where_slack).sum()  # find how much is guaranteed to have been unused
+        indices = np.nonzero(~mask_where_slack)[0]  # find indices where the lists are longer or same than threshold
+        indices_where_can_add = indices[intermediate_lengths[indices] < np_lengths[indices]]  # find indices which are still not at full capacity
+        final_indices = indices_where_can_add[:safe_to_add]  # try to take safe_to_add as many of those indices to increase their selected lengths by one
+        final_lengths = intermediate_lengths.copy()
+        final_lengths[final_indices] = np.minimum(intermediate_lengths[final_indices]+1, np_lengths[final_indices])
+        return final_lengths.tolist()
+
+
 def compute_concat_to_max_len_truncate_lengths(lenghts: List[int], max_length: int) -> List[int]:
     if sum(lenghts) <= max_length:
         return lenghts

@@ -3,13 +3,13 @@ from typing import List
 import numpy as np
 import time
 from transformers import AutoTokenizer
+from datasets import Value, Sequence, Features
 
 import logging
 import os
 
 from dataset_pipeline import prepare_targets_contexts_dataset, flatten_contexts_in_dataset
-from dataset_utils import flatten_truncate_batch_map_wrapper, flatten_truncate_function_creator, compute_mean_truncate_lengths, my_caching_load_from_disk
-from milp_dataset_utils import compute_uniform_truncate_lenghts
+from dataset_utils import flatten_truncate_batch_map_wrapper, flatten_truncate_function_creator, compute_concat_to_max_len_truncate_lengths, compute_smart_mean_truncate_lengths, my_caching_load_from_disk
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
@@ -32,6 +32,13 @@ def prepare_dataset_from_chunks(config):
         ('chunk_tokens', 'target', 'context')
     ]
 
+    targets_contexts_features = Features({
+        'target_text': Value('string'),
+        'context_text': Sequence(Value('string')),
+        'target': Sequence(Value('int32')),
+        'context': Sequence(Sequence(Value('int32')))
+    })
+
     targets_contexts_ds = prepare_targets_contexts_dataset(chunks_ds,
                                                            output_basedir_path,
                                                            epochs=config.epochs,
@@ -39,19 +46,25 @@ def prepare_dataset_from_chunks(config):
                                                            remove_target_prob=config.remove_target_percentage,
                                                            chunk_target_context_columns=chunk_target_context_columns,
                                                            num_proc=config.threads,
-                                                           save_dataset=True)
+                                                           save_dataset=True,
+                                                           features=targets_contexts_features.copy())
 
-    flatten_truncate_function = flatten_truncate_function_creator(compute_uniform_truncate_lenghts if config.uniform_truncation else compute_mean_truncate_lengths)
+    flatten_truncate_function = flatten_truncate_function_creator(compute_concat_to_max_len_truncate_lengths if config.concat_to_max_truncation else compute_smart_mean_truncate_lengths)
     flatten_truncate_batch_map_func = flatten_truncate_batch_map_wrapper(flatten_truncate_function, max_length=510, input_column="context", output_column='flat_context')
-    truncation_name = "Uniform MILP" if config.uniform_truncation else "Max Average"
+    truncation_name = "Concat To Max" if config.concat_to_max_truncation else "Smart Average"
+
+    flattened_features = targets_contexts_ds.features.copy()
+    flattened_features['flat_context'] = Sequence(Value('int32'))
 
     flattened_ds = flatten_contexts_in_dataset(targets_contexts_ds,
                                                output_basedir_path,
                                                flatten_truncate_batch_map_func,
                                                truncation_type=truncation_name,
+                                               additional_info_to_dir_name=f"epochs-{config.epochs}_seed-{config.seed}",
                                                num_proc=config.threads,
                                                keep_columns=None,
-                                               save_dataset=True)
+                                               save_dataset=True,
+                                               features=flattened_features)
             
 
 
@@ -64,7 +77,7 @@ def main():
     parser.add_argument("--output-basedir", default=None, type=str)
     parser.add_argument("--dataset", default=None, type=str)
     parser.add_argument("--threads", default=1, type=int)
-    parser.add_argument('--uniform-truncation', default=False, action='store_true', help="Use MILP uniform truncation")
+    parser.add_argument('--concat-to-max-truncation', default=False, action='store_true', help="Use simple truncation which only concatenated up to max length instead of smart averaging truncation")
 
     config = parser.parse_args()
     prepare_dataset_from_chunks(config)
