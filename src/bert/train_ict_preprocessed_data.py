@@ -3,12 +3,15 @@ from datasets import load_from_disk
 from transformers import AutoTokenizer, Trainer, TrainingArguments
 from ict import DataCollatorForPreprocessedICT, OneTowerICT, TwoTowerICT
 import torch
+from pathlib import Path
+
+from dataset_utils import my_caching_load_from_disk
 
 
 def run_experiment(config):
     os.environ["WANDB_PROJECT"] = f"ICT" if config.wandb_project is None else config.wandb_project
     assert config.dataset_name is not None, "Dataset name must be filled"
-    RUN_NAME = f'{"2T" if config.two_tower else "1T"}{" fp16" if config.fp16 else " "} Eps {config.epochs} {config.dataset_name} Seed-{config.seed} T-len {config.target_max_seq_len} C-len {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
+    RUN_NAME = f'{"2T" if config.two_tower else "1T"}{" fp16" if config.fp16 else ""} Eps {config.epochs} {config.dataset_name} Seed-{config.seed} T-len {config.target_max_seq_len} C-len {config.context_max_seq_len} Tr-batch {config.train_batch_size} Ev-b {config.eval_batch_size} O-dim {config.output_encode_dim}'
     print(RUN_NAME)
     tokenizer = AutoTokenizer.from_pretrained(config.bert_model, use_fast=True)
     data_collator = DataCollatorForPreprocessedICT(target_max_seq=config.target_max_seq_len,
@@ -17,8 +20,8 @@ def run_experiment(config):
     assert config.train_dataset is not None, "Train dataset must not be None"
     assert config.eval_dataset is not None, "Eval dataset must not be None"
 
-    train_dataset = load_from_disk(config.train_dataset)
-    eval_dataset = load_from_disk(config.eval_dataset)
+    train_dataset = my_caching_load_from_disk(Path(config.train_dataset))
+    eval_dataset = my_caching_load_from_disk(Path(config.eval_dataset))
 
     model = TwoTowerICT(config.bert_model, output_encode_dimension=config.output_encode_dim) if config.two_tower else OneTowerICT(config.bert_model, output_encode_dimension=config.output_encode_dim)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -58,6 +61,7 @@ def run_experiment(config):
     
 
 def main():
+    print("Running in main func")
     import argparse
     parser = argparse.ArgumentParser(description="Runner for ICT experiments")
     parser.add_argument('--two-tower', default=0, type=int, help="Use TwoTowerICT, use int values, 0 for false, 1 for true")
@@ -85,4 +89,5 @@ def main():
 
 
 if __name__ == '__main__':
+    print("Running in if name main")
     main()

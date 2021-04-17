@@ -129,7 +129,7 @@ class OneTowerICT(torch.nn.Module):
         return loss, target_cls_encode, context_cls_encode
 
     def save_encoder(self, name: str, basedir: Path):
-        encoder_name = f'LogEncoder_from_{name.replace(' ', '_')}'
+        encoder_name = f'LogEncoder_from_{name.replace(" ", "_")}'
         encoder_path = basedir / encoder_name
         self.tower.save_pretrained(encoder_path)
 
@@ -154,9 +154,9 @@ class TwoTowerICT(torch.nn.Module):
         return loss, target_cls_encode, context_cls_encode
 
     def save_encoder(self, name: str, basedir: Path):
-        encoder_name = f'LogEncoder_from_{name.replace(' ', '_')}'
+        encoder_name = f'LogEncoder_from_{name.replace(" ", "_")}'
         encoder_path = basedir / encoder_name
         self.target_encoder.save_pretrained(encoder_path)
-        context_encoder_name = f'ContextEncoder_from_{name.replace(' ', '_')}'
+        context_encoder_name = f'ContextEncoder_from_{name.replace(" ", "_")}'
         context_encoder_path = basedir / context_encoder_name
         self.context_encoder.save_pretrained(context_encoder_path)

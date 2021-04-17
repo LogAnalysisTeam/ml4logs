@@ -14,6 +14,8 @@ HDFS1_BLK_ID_PATTERN = re.compile(r'(blk_-?\d+)')
 
 
 def my_caching_load_from_disk(path):
+    if isinstance(path, str):
+        path = Path(path)
     ds_info_path = path / "dataset_info.json"
     state_path = path / "state.json"
     arrow_files = list(path.glob("*.arrow"))

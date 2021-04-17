@@ -6,6 +6,8 @@
 #SBATCH --error=../logs/distilbert-ict.%j.err
 #SBATCH --out=../logs/distilbert-ict.%j.out
 
+echo "Started batch script"
+
 module purge
 ml PyTorch/1.7.1-fosscuda-2019b-Python-3.7.4
 
@@ -15,6 +17,8 @@ source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
 XDG_RUNTIME_DIR=""
 HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
 export HF_HOME
+
+echo "Running in batch script, python loaded"
 
 python3 -u ./train_ict_preprocessed_data.py \
     --two-tower $TWO_TOWER \
