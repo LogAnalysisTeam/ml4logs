@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --time=4:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
+#SBATCH --partition=cpufast
+#SBATCH --mem=32G
+#SBATCH --error=../logs/ict-drop-flatten.%j.err
+#SBATCH --out=../logs/ict-drop-flatten.%j.out
+
+module purge
+ml PyTorch/1.7.1-fosscuda-2019b-Python-3.7.4
+
+cd ../src/bert
+source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
+
+XDG_RUNTIME_DIR=""
+HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
+export HF_HOME
+
+python3 -u ./ict_drop_columns_for_final_preprocessing_step.py \
+         --output-basedir /home/cernypro/dev/source/ml4logs/data/processed/Combined_20210401_only_target_flat_context \
+         --dataset /home/cernypro/dev/source/ml4logs/data/interim/Combined_20210401/train_5_epochs/flattened_contexts_epochs-5_seed-43_truncation-Smart_Average
+
