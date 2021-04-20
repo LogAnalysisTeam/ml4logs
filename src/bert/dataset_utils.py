@@ -36,7 +36,7 @@ def load_hdfs1_log_file_grouped(log_path: Path) -> Dict:
     with log_path.open(mode='r') as f:
         for line in f:
             block_id = HDFS1_BLK_ID_PATTERN.search(line).group()
-            blocks[block_id].append(line)
+            blocks[block_id].append(line.strip())
     return blocks
 
 
