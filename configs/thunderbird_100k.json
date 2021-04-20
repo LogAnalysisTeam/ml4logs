@@ -1,0 +1,113 @@
+{
+    "pipeline": [
+        {
+            "action": "download",
+            "url": "https://zenodo.org/record/3227177/files/Thunderbird.tar.gz",
+            "path": "data/raw/Thunderbird.tar.gz",
+            "skip": false
+        },
+        {
+            "action": "extract",
+            "in_path": "data/raw/Thunderbird.tar.gz",
+            "out_dir": "data/raw/Thunderbird",
+            "skip": false
+        },
+        {
+            "action": "prepare",
+            "dataset": "Thunderbird",
+            "in_dir": "data/raw/Thunderbird",
+            "logs_path": "data/interim/Thunderbird/logs.txt",
+            "labels_path": "data/interim/Thunderbird/labels.npy",
+            "skip": false
+        },
+        {
+            "action": "head",
+            "logs_path": "data/interim/Thunderbird/logs.txt",
+            "logs_head_path": "data/interim/Thunderbird/logs-100k.txt",
+            "n_rows": 100000,
+            "skip": false
+        },
+        {
+            "action": "train_fasttext",
+            "logs_path": "data/interim/Thunderbird/logs-100k.txt",
+            "model_path": "models/embeddings/fasttext_skipgram-thunderbird-100k.bin",
+            "model_args": {
+                "dim": 100,
+                "minCount": 10000,
+                "minn": 1,
+                "maxn": 1,
+                "thread": 1,
+                "verbose": 2
+            },
+            "skip": false
+        },
+        {
+            "action": "preprocess_fasttext",
+            "logs_path": "data/interim/Thunderbird/logs-100k.txt",
+            "model_path": "models/embeddings/fasttext_skipgram-thunderbird-100k.bin",
+            "embeddings_path": "data/interim/Thunderbird/fasttext-100k.npy",
+            "skip": false
+        },
+        {
+            "action": "aggregate_by_lines",
+            "features_path": "data/interim/Thunderbird/fasttext-100k.npy",
+            "labels_path": "data/interim/Thunderbird/labels.npy",
+            "dataset_path": "data/processed/Thunderbird/fasttext-100k.npz",
+            "skip": false
+        },
+        {
+            "action": "train_test_models",
+            "dataset_path": "data/processed/Thunderbird/fasttext-100k.npz",
+            "stats_path": "reports/results/Thunderbird-skipgram-100k.json",
+            "train_size": 0.2,
+            "seed": 14235,
+            "models": [
+                {
+                    "name": "logistic_regression",
+                    "args": {
+                        "C": 100,
+                        "tol": 1e-2,
+                        "max_iter": 1000,
+                        "random_state": 14235
+                    }
+                },
+                {
+                    "name": "decision_tree",
+                    "args": {
+                        "random_state": 14235
+                    }
+                },
+                {
+                    "name": "linear_svc",
+                    "args": {
+                        "penalty": "l1",
+                        "tol": 0.1,
+                        "dual": false,
+                        "random_state": 14235
+                    }
+                },
+                {
+                    "name": "lof",
+                    "args": {}
+                },
+                {
+                    "name": "one_class_svm",
+                    "args": {}
+                },
+                {
+                    "name": "isolation_forest",
+                    "args": {
+                        "random_state": 14235
+                    }
+                },
+                {
+                    "name": "pca",
+                    "args": {
+                        "random_state": 14235
+                    }
+                }
+            ],
+            "skip": false
+        }
+    ]
+}

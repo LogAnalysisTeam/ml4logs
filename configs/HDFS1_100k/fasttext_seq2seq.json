@@ -1,0 +1,29 @@
+{
+    "pipeline": [
+        {
+            "action": "train_test_seq2seq",
+            "features_path": "data/interim/HDFS1_100k/fasttext-timedeltas.npy",
+            "blocks_path": "data/interim/HDFS1_100k/blocks.npy",
+            "labels_path": "data/interim/HDFS1_100k/labels.npy",
+            "stats_path": "reports/results/HDFS1_100k-skipgram-seq2seq.json",
+            "model_kwargs": {
+                "n_lstm_layers": 1,
+                "n_hidden_linears": 2,
+                "linear_width": 300,
+                "linear_norm": false
+            },
+            "optim_kwargs": {
+                "lr": 1e-2
+            },
+            "lr_scheduler_kwargs": {
+                "gamma": 0.9817
+            },
+            "train_size": 0.4,
+            "validation_size": 0.2,
+            "batch_size": 512,
+            "epochs": 5,
+            "device": "cuda",
+            "seed": 14235
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+{
+    "pipeline": [
+        {
+            "action": "train_fasttext",
+            "logs_path": "data/interim/HDFS1/logs.txt",
+            "model_path": "models/embeddings/HDFS1/fasttext_skipgram.bin",
+            "model_args": {
+                "dim": 100,
+                "minCount": 10000,
+                "minn": 1,
+                "maxn": 1,
+                "thread": 1,
+                "verbose": 2
+            }
+        },
+        {
+            "action": "preprocess_fasttext",
+            "logs_path": "data/interim/HDFS1/logs.txt",
+            "model_path": "models/embeddings/HDFS1/fasttext_skipgram.bin",
+            "embeddings_path": "data/interim/HDFS1/fasttext.npy"
+        },
+        {
+            "action": "merge_features",
+            "features_paths": [
+                "data/interim/HDFS1/fasttext.npy",
+                "data/interim/HDFS1/timedeltas.npy"
+            ],
+            "merged_path": "data/interim/HDFS1/fasttext-timedeltas.npy"
+        },
+        {
+            "action": "aggregate_by_blocks",
+            "features_path": "data/interim/HDFS1/fasttext-timedeltas.npy",
+            "blocks_path": "data/interim/HDFS1/blocks.npy",
+            "labels_path": "data/interim/HDFS1/labels.npy",
+            "dataset_path": "data/processed/HDFS1/fasttext-average.npz",
+            "method": "average"
+        }
+    ]
+}

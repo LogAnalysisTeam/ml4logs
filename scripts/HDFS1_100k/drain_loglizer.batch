@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH --partition=cpu
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=32G
+#SBATCH --job-name hdfs1_100k_drain_loglizer
+#SBATCH --output .hdfs1_100k_drain_loglizer_%j.out
+
+if [ -f "${PROJECT_DIR}/init_environment.sh" ]; then
+    source "${PROJECT_DIR}/init_environment.sh"
+fi
+
+"${ML4LOGS_PYTHON}" -m ml4logs "${PROJECT_DIR}/configs/HDFS1_100k/drain_loglizer.json"

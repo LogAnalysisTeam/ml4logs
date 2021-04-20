@@ -1,0 +1,51 @@
+{
+    "pipeline": [
+        {
+            "action": "train_test_models",
+            "dataset_path": "data/processed/HDFS1/ibm_drain.npz",
+            "stats_path": "reports/results/HDFS1-ibm_drain-loglizer.json",
+            "train_size": 0.2,
+            "seed": 14235,
+            "models": [
+                {
+                    "name": "logistic_regression",
+                    "args": {
+                        "C": 100,
+                        "tol": 1e-2,
+                        "max_iter": 1000,
+                        "random_state": 14235
+                    }
+                },
+                {
+                    "name": "decision_tree",
+                    "args": {
+                        "random_state": 14235
+                    }
+                },
+                {
+                    "name": "linear_svc",
+                    "args": {
+                        "penalty": "l1",
+                        "tol": 0.1,
+                        "dual": false,
+                        "random_state": 14235
+                    }
+                },
+                {
+                    "name": "lof",
+                    "args": {}
+                },
+                {
+                    "name": "one_class_svm",
+                    "args": {}
+                },
+                {
+                    "name": "isolation_forest",
+                    "args": {
+                        "random_state": 14235
+                    }
+                }
+            ]
+        }
+    ]
+}

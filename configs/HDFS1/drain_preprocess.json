@@ -1,0 +1,19 @@
+{
+    "pipeline": [
+        {
+            "action": "parse_ibm_drain",
+            "logs_path": "data/interim/HDFS1/logs.txt",
+            "eventids_path": "data/interim/HDFS1/ibm_drain-eventids.npy",
+            "templates_path": "data/interim/HDFS1/ibm_drain-templates.csv",
+            "regex": "[^:]*: (?P<content>.*)"
+        },
+        {
+            "action": "aggregate_by_blocks",
+            "features_path": "data/interim/HDFS1/ibm_drain-eventids.npy",
+            "blocks_path": "data/interim/HDFS1/blocks.npy",
+            "labels_path": "data/interim/HDFS1/labels.npy",
+            "dataset_path": "data/processed/HDFS1/ibm_drain.npz",
+            "method": "count_vector"
+        }
+    ]
+}
