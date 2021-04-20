@@ -4,10 +4,6 @@ export ML4LOGS_PYTHON = python
 
 # The default shell is "bash", for cluster environment you would most like want to use a workload manager instead
 # e.g., for Slurm , set the ML4LOGS_SHELL variable to "sbatch"
-# ifndef $(ML4LOGS_SHELL)
-# export ML4LOGS_SHELL = bash
-# endif
-
 ML4LOGS_SHELL := $(if $(ML4LOGS_SHELL),$(ML4LOGS_SHELL),bash)
 $(info Using ML4LOGS_SHELL="$(ML4LOGS_SHELL)")
 
