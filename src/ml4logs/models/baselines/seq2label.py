@@ -134,6 +134,10 @@ def train_test_seq2label(args):
 
     ml4logs.utils.mkdirs(files=[stats_path])
 
+    import os
+    logger.info(f"current path: {os.getcwd()}")
+    logger.info(f"features_path: {features_path}")
+
     features = np.load(features_path).astype(np.float32)
     blocks = np.load(blocks_path)
     labels = np.load(labels_path)

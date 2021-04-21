@@ -16,21 +16,21 @@ or in development regime:
 
 Various pipelines are run using batches in `scripts/`. We suggest to run the scripts via `Makefile`:
 
-`make {COMMAND_NAME}`
+`make COMMAND_NAME`
 
-The scripts support SLURM cluster batch scheduler. Set `ML4LOGS_SHELL` environment variable to `sbatch` in case you perform the experiments on the cluster.
+The scripts support SLURM cluster batch scheduler. Set `ML4LOGS_SHELL` environment variable to `sbatch` in case you perform the experiments on the cluster. See [RCI Quick Start](docs/RCI_quick_start.md) for full details on how to setup development environment.
 
-If  `init_environment.sh` script exists in the project root directory, it is sourced (i.e., using `bash` `source` command) prior running any batch in `scripts/`. Use it to set up your virtual environment, scheduler modules, etc.
+If  `init_environment.sh` script exists in the project root directory, it is `source`d (via `bash` `source` command) prior running any batch in `scripts/`. Use it to set up your virtual environment, scheduler modules, etc.
 
-### Run benchmark on HDFS1 (100k lines)
+### Run Benchmark on HDFS1 (100k lines)
 
 - `make hdfs1_100k_data`
-- wait
+- wait until finish
 - `make hdfs1_100k_preprocess`
 - wait
 - `make hdfs1_100k_train_test`
 
-### Run benchmark on HDFS1
+### Run Benchmark on HDFS1
 
 - `make hdfs1_data`
 - wait
@@ -38,34 +38,35 @@ If  `init_environment.sh` script exists in the project root directory, it is sou
 - wait
 - `make hdfs1_train_test`
 
-## Description of scripts and configs
+## Scripts and Configuration Files
 
-- Each script executes only one config
-- Config describes pipeline of actions which are applied to our data
+- Each script executes corresponds to a single pipeline config (see `configs/` directory)
+- Config describes a sequential pipeline of actions which is applied to data
 
-### Scripts/configs
 
-data
+### `data`
 
-- Download archive
-- Extract archive
-- Prepare dataset
+- Downloads archive.
+- Extracts archive.
+- Prepares the dataset:
+  - **TODO: ADD DETAILS HERE**
+  - Time deltas are computed. Time deltas measure the time differences between successive log lines.
 
-drain_preprocess
+### `drain_preprocess`
 
-- Parse using IBM/Drain3
-- Aggregate by block using count vector
+- Parses log keys (log templates) using [IBM/Drain3](https://github.com/IBM/Drain3).
+- Aggregates log lines by blocks, which correspond to level at which anomaly labels are given.
 
-fasttext_preprocess
+### `fasttext_preprocess`
 
-- Train fasttext model
-- Get embeddings for all log lines
-- Merge with timedeltas
-- Aggregate by block using selected method (sum, average, min, max)
+- Trains the [fastText](https://fasttext.cc/) model.
+- Gets embeddings for all log lines.
+- Concatenates the embeddings with the time deltas.
+- Aggregates per-log line embeddings to per-block ones using selected method (sum, average, min, max).
 
-drain_loglizer
+### `drain_loglizer`
 
-- Train and test models which are used by loglizer on drain parsed dataset
+Trains and tests models which are specified by [loglizer](https://github.com/logpai/loglizer) on Drain-parsed dataset. These are:
   - Logistic regression
   - Decision tree
   - Linear SVC
@@ -73,9 +74,9 @@ drain_loglizer
   - One class SVM
   - Isolation forest
 
-fasttext_loglizer
+### `fasttext_loglizer`
 
-- Train and test models which are used by loglizer on aggregated fasttext embeddings
+Trains and tests [loglizer](https://github.com/logpai/loglizer) specified models for aggregated fastText embeddings:
   - Logistic regression
   - Decision tree
   - Linear SVC
@@ -84,16 +85,20 @@ fasttext_loglizer
   - Isolation forest
   - PCA
 
-fasttext_seq2seq
+### `fasttext_seq2seq`
 
-- Train and test sequence model
-- Try to predict next embedding using LSTM based torch model
-- Compute threshold on train dataset (assume 5% logs are anomalies)
-- Test on different thresholds and save statistics
+- Trains and tests a sequential model as defined in [[1]](#1).
+- Predicts the following log line embedding based on a history of log line embeddings.
+- Uses LSTM based Torch model.
+- Computes the threshold on a train dataset (assuming 5% logs are anomalies).
+- Tests different thresholds and saves the statistics.
 
-## Description of data files
+## Results
+**TODO put result tables here**
 
-### Dataset labeled by block (e.g. HDFS)
+## Data Files Description
+
+### Block-Level Labeled Datasets (e.g., HDFS)
 
 ```
 N - Number of log lines
@@ -123,3 +128,8 @@ data
         ├── {ARCHIVE}.tar.gz
         └── Dataset specific files
 ```
+
+## References
+<a id="1">[1]</a> 
+M. Souček, ["Log Anomaly Detection"](https://dspace.cvut.cz/handle/10467/90271), master thesis, Czech Technical University in Prague, 2020.
+
