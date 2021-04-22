@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --time=4:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=2
+#SBATCH --partition=cpufast
+#SBATCH --mem=32G
+#SBATCH --error=../logs/embed-labeled-dataset-fasttext.%j.err
+#SBATCH --out=../logs/embed-labeled-dataset-fasttext.%j.out
+
+module purge
+ml PyTorch/1.7.1-fosscuda-2019b-Python-3.7.4
+
+cd ../src/features
+source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
+
+XDG_RUNTIME_DIR=""
+
+python3 -u ./embed_labeled_dataset_fasttext_for_anomaly_detection.py \
+         --model-path $MODEL_PATH \
+         --input-dataset-log-file $LOGFILE_PATH \
+         --input-dataset-labels-csv $LABEL_CSV_PATH \
+         --output-parent-folder /home/cernypro/dev/source/ml4logs/data/interim
+

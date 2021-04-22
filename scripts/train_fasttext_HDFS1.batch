@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --time=4:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=1
+#SBATCH --partition=cpufast
+#SBATCH --mem=20G
+#SBATCH --error=../logs/train_fasttext_HDFS1.%j.err
+#SBATCH --out=../logs/train_fasttext_HDFS1.%j.out
+
+module purge
+ml PyTorch/1.7.1-fosscuda-2019b-Python-3.7.4
+
+cd ../src/features
+source /home/cernypro/dev/envs/huggingface_gpu/bin/activate
+
+XDG_RUNTIME_DIR=""
+
+python3 -u ./train_fasttext.py \
+    --dataset /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/no_timestamps_train-data-HDFS1-cv1-1-time-ordered.log \
+    --output-dir /home/cernypro/dev/source/ml4logs/models/embeddings
