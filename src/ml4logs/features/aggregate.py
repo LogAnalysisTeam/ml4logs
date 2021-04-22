@@ -65,7 +65,7 @@ def aggregate_by_lines(args):
 
     logger.info('Load features and labels')
     features = np.load(features_path)
-    labels = np.load(labels_path)[:len(features)]
+    labels = np.load(labels_path)
 
     logger.info('X = %s, Y = %s', features.shape, labels.shape)
     logger.info('Save dataset into \'%s\'', dataset_path)
