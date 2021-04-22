@@ -94,16 +94,7 @@ def prepare_hdfs_2(args):
 
 
 def prepare_bgl(args):
-    in_dir = pathlib.Path(args['in_dir'])
-    split_labels(args, in_dir / 'BGL.log', '-')
-
-
-def prepare_thunderbird(args):
-    in_dir = pathlib.Path(args['in_dir'])
-    split_labels(args, in_dir / 'Thunderbird.log', '-')
-
-
-def split_labels(args, in_path, normal_label):
+    in_path = pathlib.Path(args['in_dir']) / 'BGL.log'
     logs_path = pathlib.Path(args['logs_path'])
     labels_path = pathlib.Path(args['labels_path'])
 
@@ -118,7 +109,30 @@ def split_labels(args, in_path, normal_label):
         for i, line in enumerate(in_f):
             label, raw_log = tuple(line.strip().split(maxsplit=1))
             logs_out_f.write(f'{raw_log}\n')
-            labels.append(0 if label == normal_label else 1)
+            labels.append(0 if label == '-' else 1)
+            if i % step <= 0:
+                logger.info('Processed %d / %d lines', i, n_lines)
+    logger.info('Save labels into \'%s\'', labels_path)
+    np.save(labels_path, np.array(labels))
+
+
+def prepare_thunderbird(args):
+    in_path = pathlib.Path(args['in_dir']) / 'Thunderbird.log'
+    logs_path = pathlib.Path(args['logs_path'])
+    labels_path = pathlib.Path(args['labels_path'])
+
+    ml4logs.utils.mkdirs(files=[logs_path, labels_path])
+
+    n_lines = ml4logs.utils.count_file_lines(in_path)
+    step = n_lines // 10
+    logger.info('Start splitting labels and log messages')
+    labels = []
+    with in_path.open(encoding='utf8') as in_f, \
+            logs_path.open('w', encoding='utf8') as logs_out_f:
+        for i, line in enumerate(in_f):
+            label, raw_log = tuple(line.strip().split(maxsplit=1))
+            logs_out_f.write(f'{raw_log}\n')
+            labels.append(0 if label == '-' else 1)
             if i % step <= 0:
                 logger.info('Processed %d / %d lines', i, n_lines)
     logger.info('Save labels into \'%s\'', labels_path)
