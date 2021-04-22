@@ -13,6 +13,10 @@ import numpy as np
 import ml4logs
 
 
+# ===== CONSTANTS =====
+CHUNK_SIZE = 8196
+
+
 # ===== GLOBALS =====
 logger = logging.getLogger(__name__)
 
@@ -21,12 +25,18 @@ logger = logging.getLogger(__name__)
 def download(args):
     path = pathlib.Path(args['path'])
 
+    if not args['force'] and path.exists():
+        logger.info('File already exists and force is false')
+        return
+
     ml4logs.utils.mkdirs(files=[path])
 
     logger.info('Download \'%s\'', args['url'])
-    response = requests.get(args['url'])
-    logger.info('Save into \'%s\'', path)
-    path.write_bytes(response.content)
+    with requests.get(args['url'], stream=True) as r:
+        r.raise_for_status()
+        with path.open('wb') as f:
+            for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                f.write(chunk)
 
 
 def extract(args):
