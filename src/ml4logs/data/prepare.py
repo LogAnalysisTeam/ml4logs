@@ -121,20 +121,36 @@ def prepare_thunderbird(args):
     in_path = pathlib.Path(args['in_dir']) / 'Thunderbird.log'
     logs_path = pathlib.Path(args['logs_path'])
     labels_path = pathlib.Path(args['labels_path'])
+    timedeltas_path = pathlib.Path(args['timedeltas_path'])
 
-    ml4logs.utils.mkdirs(files=[logs_path, labels_path])
+    ml4logs.utils.mkdirs(files=[logs_path, labels_path, timedeltas_path])
 
     n_lines = ml4logs.utils.count_file_lines(in_path)
     step = n_lines // 10
-    logger.info('Start splitting labels and log messages')
+    logger.info('Start splitting labels, timestamps and log messages')
     labels = []
+    timestamps = []
     with in_path.open(encoding='utf8') as in_f, \
             logs_path.open('w', encoding='utf8') as logs_out_f:
         for i, line in enumerate(in_f):
             label, raw_log = tuple(line.strip().split(maxsplit=1))
             logs_out_f.write(f'{raw_log}\n')
             labels.append(0 if label == '-' else 1)
+            raw_log_splitted = raw_log.split()
+            dt_str = raw_log_splitted[1] + ' ' + raw_log_splitted[5]
+            dt = datetime.datetime.strptime(dt_str, r'%Y.%m.%d %H:%M:%S')
+            timestamps.append(dt.timestamp())
             if i % step <= 0:
                 logger.info('Processed %d / %d lines', i, n_lines)
+    timestamps = np.array(timestamps)
+
     logger.info('Save labels into \'%s\'', labels_path)
     np.save(labels_path, np.array(labels))
+
+    logger.info('Compute timedeltas')
+    timedeltas = np.zeros_like(timestamps)
+    timedeltas[1:] = timestamps[1:] - timestamps[:-1]
+    timedeltas = np.expand_dims(timedeltas, axis=timedeltas.ndim)
+
+    logger.info('Save timedeltas into \'%s\'', timedeltas_path)
+    np.save(timedeltas_path, timedeltas)
