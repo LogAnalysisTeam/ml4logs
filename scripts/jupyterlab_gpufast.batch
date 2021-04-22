@@ -2,9 +2,9 @@
 #SBATCH --time=4:00:00
 #SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
 #SBATCH --partition=gpufast --gres=gpu:1
-#SBATCH --mem=20G
-#SBATCH --error=../logs/jupyter.%j.err
-#SBATCH --out=../logs/jupyter.%j.out
+#SBATCH --mem=32G
+#SBATCH --error=../logs/jupyter_gpufast.%j.err
+#SBATCH --out=../logs/jupyter_gpufast.%j.out
 
 module purge
 ml PyTorch/1.7.1-fosscuda-2019b-Python-3.7.4

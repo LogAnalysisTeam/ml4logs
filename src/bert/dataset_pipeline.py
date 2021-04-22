@@ -110,15 +110,38 @@ def create_dataset_from_in_memory_dict(in_memory_data: Dict[str, List[Any]],
     return on_disk_ds
 
 
+def chunkify_whole_dataset(ds: Dataset,
+                           output_ds_basedir: Path,
+                           chunk_size: int,
+                           additional_info_to_dir_name: Optional[str] = None,
+                           drop_last_incomplete_chunk:bool = True,
+                           save_dataset: bool=True):
+    output_path = output_ds_basedir / f'chunked-size-{chunk_size}_whole-dataset{"" if additional_info_to_dir_name is None else f"_{additional_info_to_dir_name}"}'
+    log.info(f'Chunking and saving to {output_path}')
+    start = time()
+    try:
+        chunked_ds = my_caching_load_from_disk(output_path)
+    except FileNotFoundError as e:
+        chunked_dict = chunkify_dataset_in_memory_return_dict(ds, chunk_size, drop_last_incomplete_chunk=drop_last_incomplete_chunk)
+        features = Features({
+            'chunk_text': Sequence(Value('string')),
+            'chunk_tokens': Sequence(Sequence(Value('int32')))
+            })
+        chunked_ds = create_dataset_from_in_memory_dict(chunked_dict, output_path, features=features.copy(), save_dataset=save_dataset)
+        del chunked_dict
+    log.info(f'Chunking whole dataset done, time taken: {time() - start}s')
+    return chunked_ds
+
 def chunkify_train_val_split(ds: Dataset,
                              output_ds_basedir: Path,
                              chunk_size: int,
                              desired_total_chunks_taken:int,
                              val_ratio: float,
                              seed: int,
+                             additional_info_to_dir_name: Optional[str] = None,
                              drop_last_incomplete_chunk:bool = True,
                              save_dataset: bool=True) -> Dict[str, Dataset]:
-    output_basepath = output_ds_basedir / f'chunked-size-{chunk_size}_split-total-size-{desired_total_chunks_taken}_seed-{seed}'
+    output_basepath = output_ds_basedir / f'chunked-size-{chunk_size}_split-total-size-{desired_total_chunks_taken}_seed-{seed}{"" if additional_info_to_dir_name is None else f"_{additional_info_to_dir_name}"}'
     log.info(f'Chunking and splitting to {output_basepath}')
     start = time()
     train_path = output_basepath / 'train'
@@ -127,7 +150,7 @@ def chunkify_train_val_split(ds: Dataset,
         train_ds = my_caching_load_from_disk(train_path)
         val_ds = my_caching_load_from_disk(val_path)
     except FileNotFoundError as e:
-        chunked_dict = chunkify_dataset_in_memory_return_dict(ds, chunk_size)
+        chunked_dict = chunkify_dataset_in_memory_return_dict(ds, chunk_size, drop_last_incomplete_chunk=drop_last_incomplete_chunk)
         train_val_split_dict = train_val_split_in_memory_dict(chunked_dict, desired_total_chunks_taken, val_ratio,
                                                               rnd=np.random.default_rng(seed=seed))
         del chunked_dict
@@ -159,9 +182,28 @@ def tokenize_chunkify_split_pipeline_single_dataset(ds: Dataset,
     start = time()
     tokenized_ds = tokenize_dataset(ds, output_ds_basedir, tokenizer_bert_model, save_dataset=save_dataset)
     train_val_split = chunkify_train_val_split(tokenized_ds, output_ds_basedir, chunk_size, desired_total_chunks_taken, val_ratio, seed,
+                                               additional_info_to_dir_name=tokenizer_bert_model,
                                                drop_last_incomplete_chunk=drop_last_incomplete_chunk, save_dataset=save_dataset)
     log.info(f'Done tok-chunk-split pipeline for {cur_name}, time taken: {time()- start}s')
     return train_val_split
+
+
+def tokenize_chunkify_whole_single_dataset(ds: Dataset,
+                                           output_ds_basedir: Path,
+                                           tokenizer_bert_model: str,
+                                           chunk_size: int,
+                                           drop_last_incomplete_chunk:bool=True,
+                                           save_dataset: bool=True
+                                           ) -> Dataset:
+    log.info(f'Tokenization and chunkification pipeline for whole dataset.')
+    start = time()
+    tokenized_ds = tokenize_dataset(ds, output_ds_basedir, tokenizer_bert_model, save_dataset=save_dataset)
+    chunked_ds = chunkify_whole_dataset(tokenized_ds, output_ds_basedir, chunk_size, 
+                                        drop_last_incomplete_chunk=drop_last_incomplete_chunk,
+                                        save_dataset=save_dataset, additional_info_to_dir_name=tokenizer_bert_model)
+    log.info(f'Done tokenization and chunkification pipeline for whole dataset, time taken: {time() - start}s')
+    return chunked_ds
+
 
 
 def combine_datasets(datasets: Dict[str, Dataset],

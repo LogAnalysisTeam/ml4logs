@@ -3,60 +3,37 @@ from pathlib import Path
 from typing import List
 import time
 from transformers import AutoTokenizer
+import logging
+import os
 
-from dataset_utils import prepare_target_and_context, tokenize_no_special_tokens
+from dataset_pipeline import tokenize_chunkify_whole_single_dataset
 
+logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
-def chunkify_tokens_and_text(examples):
-    return {'chunk_text' : [examples['text']], 'chunk_tokens': [examples['tokens']]}
-
+log = logging.getLogger(__name__)
 
 def tokenize_and_chunkify(config):
     assert config.dataset_log_file is not None, "There must be a log file"
     assert config.threads >= 1, "Threads must be atleast 1"
     raw_dataset_log_path = Path(config.dataset_log_file)
-    output_basedir_path = Path(config.output_basedir)
 
     log_filename_stem = raw_dataset_log_path.stem
     INFO = f'Context-Size-{config.context_sentence_count}'
-    NAME = f'{log_filename_stem}_{INFO}'
-    print(NAME)
-    print(config)
+    NAME = f'{raw_dataset_log_path.stem}_{INFO}'
+    log.info(NAME)
+    log.info(config)
 
-    output_dir_path = output_basedir_path / log_filename_stem
+    output_dir_path = raw_dataset_log_path.parent / raw_dataset_log_path.stem
 
-    print(f"Loading raw dataset from {raw_dataset_log_path}")
+    log.info(f"Loading raw dataset from {raw_dataset_log_path}")
     start = time.time()
-    raw_dataset = load_dataset('text', data_files=str(raw_dataset_log_path), split='train', keep_in_memory=True)
-    print("Raw loaded")
-    print(f'Time taken: {time.time() - start}s')
+    raw_dataset = load_dataset('text', data_files=str(raw_dataset_log_path), split='train')
+    log.info("Raw loaded")
+    log.info(f'Time taken: {time.time() - start}s')
 
-    print(f"Tokenizing dataset")
-    start = time.time()
-    tokenizer = AutoTokenizer.from_pretrained(config.bert_model)
-    tokenized_dataset = raw_dataset.map(tokenize_no_special_tokens, fn_kwargs={'tokenizer': tokenizer}, batched=True, batch_size=100000, keep_in_memory=True)
-    del tokenizer
-    del raw_dataset
-    
-    tokenized_path = output_dir_path / 'purely_tokenized'
-    print(f'Tokenized, saving to {tokenized_path}')
-    tokenized_dataset.save_to_disk(tokenized_path)
-    print(f'Time taken: {time.time() - start}s')
-
-    print(f"Creating contexts of size {config.context_sentence_count}")
-    start = time.time()
-    contexts_dataset = tokenized_dataset.map(chunkify_tokens_and_text,
-                                             batched=True,
-                                             batch_size=config.context_sentence_count,
-                                             drop_last_batch=True,
-                                             remove_columns=tokenized_dataset.column_names,
-                                             num_proc=config.threads,
-                                             keep_in_memory=True)
-    chunked_path = output_dir_path / f'chunked_size_{config.context_sentence_count}_tokens_text'
-    del tokenized_dataset
-    print(f'Chunked, saving to {chunked_path}')
-    contexts_dataset.save_to_disk(chunked_path)
-    print(f'Time taken: {time.time() - start}s')
+    chunked_ds = tokenize_chunkify_whole_single_dataset(raw_dataset, output_dir_path,
+                                                        config.bert_model, config.context_sentence_count, 
+                                                        drop_last_incomplete_chunk=True, save_dataset=True)
             
 
 
@@ -65,7 +42,6 @@ def main():
     parser = argparse.ArgumentParser(description="Tokenization and chunkification")
     parser.add_argument('--bert-model', default="distilbert-base-cased", type=str, help="Pretrained Transformer for tokenizer.")
     parser.add_argument("--context-sentence-count", default=10, type=int)
-    parser.add_argument("--output-basedir", default="/home/cernypro/dev/source/ml4logs/data", type=str)
     parser.add_argument("--dataset-log-file", default=None, type=str)
     parser.add_argument("--threads", default=1, type=int)
 
@@ -77,4 +53,4 @@ if __name__ == '__main__':
     start = time.time()
     main()
     end = time.time()
-    print(f'Total time taken: {end - start}s')
+    log.info(f'Total time taken: {end - start}s')
