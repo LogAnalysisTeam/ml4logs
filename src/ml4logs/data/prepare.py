@@ -36,7 +36,8 @@ def prepare_hdfs_1(args):
     labels_path = pathlib.Path(args['labels_path'])
     timedeltas_path = pathlib.Path(args['timedeltas_path'])
 
-    ml4logs.utils.mkdirs(files=[logs_path, labels_path, blocks_path])
+    ml4logs.utils.mkdirs(files=[logs_path, labels_path,
+                                blocks_path, timedeltas_path])
 
     in_labels_path = in_dir / 'anomaly_label.csv'
     logger.info('Read labels from \'%s\'', in_labels_path)
