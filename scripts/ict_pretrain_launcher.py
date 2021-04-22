@@ -17,14 +17,16 @@ if __name__ == '__main__':
                 dataset_path = datasets_basepath / dataset_folder_name
                 dataset_run_name = f'Combined_20210401_roberta_{truncation.lower().replace("_", "-")}_epochs-{epoch}_seed-{seed}'
                 for two_tower in [False, True]:
-                    run_train_ict_from_preprocessed(two_tower=two_tower,
-                                                    encoder_type='RobertaCls',
-                                                    bert_model='distilroberta-base',
-                                                    dataset_run_name=dataset_run_name,
-                                                    dataset_path=dataset_path,
-                                                    eval_dataset_path='/home/cernypro/dev/source/ml4logs/data/processed/val-data-HDFS1-cv1-1-time-ordered_chunked-10_roberta/flattened_contexts_epochs-1_seed-43_truncation-Concat_To_Max',
-                                                    output_encode_dim=100,
-                                                    target_max_seq_len=512,
-                                                    eval_steps=7500,
-                                                    save_steps=5000,
-                                                    logging_steps=100)
+                    job_num = run_train_ict_from_preprocessed(two_tower=two_tower,
+                                                              encoder_type='RobertaCls',
+                                                              bert_model='distilroberta-base',
+                                                              dataset_run_name=dataset_run_name,
+                                                              dataset_path=dataset_path,
+                                                              eval_dataset_path='/home/cernypro/dev/source/ml4logs/data/processed/val-data-HDFS1-cv1-1-time-ordered_chunked-10_roberta/flattened_contexts_epochs-1_seed-43_truncation-Concat_To_Max',
+                                                              output_encode_dim=100,
+                                                              train_batch_size=32,
+                                                              target_max_seq_len=512,
+                                                              eval_steps=7500,
+                                                              save_steps=5000,
+                                                              logging_steps=100)
+                    print(f"Submitted {job_num}")
