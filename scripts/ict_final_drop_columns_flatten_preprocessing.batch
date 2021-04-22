@@ -17,6 +17,6 @@ HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
 export HF_HOME
 
 python3 -u ./ict_drop_columns_for_final_preprocessing_step.py \
-         --output-basedir /home/cernypro/dev/source/ml4logs/data/processed/Combined_20210401_only_target_flat_context \
-         --dataset /home/cernypro/dev/source/ml4logs/data/interim/Combined_20210401/train_5_epochs/flattened_contexts_epochs-5_seed-43_truncation-Smart_Average
+         --output-basedir /home/cernypro/dev/source/ml4logs/data/processed/val-data-HDFS1-cv1-1-time-ordered_chunked-10_roberta \
+         --dataset /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/no_timestamps_val-data-HDFS1-cv1-1-time-ordered/roberta_ict_whole_chunked-size-10/flattened_contexts_epochs-1_seed-43_truncation-Concat_To_Max
 

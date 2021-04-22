@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --time=04:00:00
-#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=8
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=2
 #SBATCH --partition=cpufast
-#SBATCH --mem=80G
+#SBATCH --mem=40G
 #SBATCH --error=../logs/prepare-ict-from-chunks.%j.err
 #SBATCH --out=../logs/prepare-ict-from-chunks.%j.out
 
@@ -17,9 +17,9 @@ HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
 export HF_HOME
 
 python3 -u ./prepare_ict_dataset_from_chunks.py \
-    --epochs 5 \
+    --epochs 1 \
     --seed 43 \
-    --dataset /home/cernypro/dev/source/ml4logs/data/interim/Combined_20210401/source_text_tokens_chunks_shuffled_seed-43/train \
-    --output-basedir /home/cernypro/dev/source/ml4logs/data/interim/Combined_20210401/train_5_epochs \
-    --threads $SLURM_CPUS_PER_TASK \
+    --dataset /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/no_timestamps_val-data-HDFS1-cv1-1/chunked-size-10_whole-dataset_distilroberta-base \
+    --output-basedir /home/cernypro/dev/source/ml4logs/data/interim/HDFS1/no_timestamps_val-data-HDFS1-cv1-1/roberta_ict_whole_chunked-size-10 \
+    --threads 1 \
     --concat-to-max-truncation

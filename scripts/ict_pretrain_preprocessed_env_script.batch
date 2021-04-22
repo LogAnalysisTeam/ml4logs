@@ -3,8 +3,9 @@
 #SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
 #SBATCH --partition=gpu --gres=gpu:1
 #SBATCH --mem=48G
-#SBATCH --error=../logs/distilbert-ict.%j.err
-#SBATCH --out=../logs/distilbert-ict.%j.out
+#SBATCH --error=../logs/ict.%j.err
+#SBATCH --out=../logs/ict.%j.out
+
 module purge
 ml PyTorch/1.7.1-fosscuda-2019b-Python-3.7.4
 
@@ -17,6 +18,8 @@ export HF_HOME
 
 python3 -u ./train_ict_preprocessed_data.py \
     --two-tower $TWO_TOWER \
+    --encoder-type $ENCODER_TYPE \
+    --bert-model $BERT_MODEL \
     --output-encode-dim $OUTPUT_ENCODE_DIM \
     --train-batch-size $TRAIN_BATCH_SIZE \
     --target-max-seq-len $TARGET_MAX_SEQ_LEN \

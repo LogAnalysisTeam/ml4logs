@@ -2,17 +2,10 @@ import subprocess, os
 from pathlib import Path
 
 if __name__ == '__main__':
-    model_names = [
-        'LogEncoder_from_1T__Eps_1_Combined_20210401_uniform_3_epochs_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
-        'LogEncoder_from_1T_Eps_1_Combined_20210401_max-avg_3_epochs_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
-        'LogEncoder_from_1T_Eps_1_Combined_20210401_uniform_3_epochs_Seed-42_T-len_170_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
-        'LogEncoder_from_2T__Eps_1_Combined_20210401_uniform_3_epochs_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
-        'LogEncoder_from_2T_Eps_1_Combined_20210401_max-avg_3_epochs_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100'
-    ]
 
     datasets_basepath = Path('/home/cernypro/dev/source/ml4logs/data/processed/Combined_20210401_train_only_target_flat_context')
 
-    epochs = [5, 3]
+    epochs = [3]
     seeds = [43]
     truncations = ['Smart_Average', 'Concat_To_Max']
 

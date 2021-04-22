@@ -1,7 +1,7 @@
 from typing import List, Union, Dict, Optional
 import torch
 from pathlib import Path
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, AutoConfig
 import time
 import logging
 import pandas as pd
@@ -11,7 +11,7 @@ import pickle
 import os
 
 from dataset_utils import load_hdfs1_log_file_grouped
-from encoders import DistilBertForClsEmbedding
+from encoders import KNOWN_ENCODER_CLASSES
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
@@ -52,8 +52,14 @@ def embed_dataset(config):
     start = time.time()
     tokenizer = AutoTokenizer.from_pretrained(config.base_model_name)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    encoder_model = DistilBertForClsEmbedding.from_pretrained(config.model_path).to(device)
+
+    available_encoder_classes_dict = {c.__name__:c for c in KNOWN_ENCODER_CLASSES.values()}
+    model_config = AutoConfig.from_pretrained(config.model_path)
+    encoder_model_class = available_encoder_classes_dict[model_config.architectures[0]]  # TODO: check whether acceptable solution
+
+    encoder_model = encoder_model_class.from_pretrained(config.model_path).to(device)
     encoder_model.eval()
+
     embedded_dataset = {block_id: encode_batch(block_lines, tokenizer, encoder_model, device=device) for block_id, block_lines in tqdm(dataset.items())}
     log.info(f'Done, time taken: {time.time() - start}s')
     log.info(f"Saving dataset to {output_path}")

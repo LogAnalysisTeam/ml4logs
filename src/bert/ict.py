@@ -6,8 +6,6 @@ from transformers import AutoModel
 
 from pathlib import Path
 
-from encoders import DistilBertForClsEmbedding
-
 
 def _make_mask(padded_batch, pad_token=0):
     return (padded_batch != pad_token).to(torch.uint8)
@@ -115,9 +113,9 @@ class OneTowerICT(torch.nn.Module):
     Network for the inverse close task, uses one BERT tower for creating encodings of target and context sentences (query and document as per nomenclature of original paper)
     Uses cross entropy loss
     """
-    def __init__(self, pretrained_model_name_or_path, output_encode_dimension=512):
+    def __init__(self, tower_class, pretrained_model_name_or_path, output_encode_dimension=100):
         super(OneTowerICT, self).__init__()
-        self.tower = DistilBertForClsEmbedding.from_pretrained(pretrained_model_name_or_path,
+        self.tower = tower_class.from_pretrained(pretrained_model_name_or_path,
                                                                task_specific_params={'cls_embedding_dimension': output_encode_dimension})
         self.loss_fn = torch.nn.CrossEntropyLoss()
     def forward(self, target, target_mask, context, context_mask, correct_class):
@@ -136,13 +134,13 @@ class OneTowerICT(torch.nn.Module):
 
 
 class TwoTowerICT(torch.nn.Module):
-    def __init__(self, target_tower_pretrained_model_name_or_path, context_tower_pretrained_model_name_or_path=None, output_encode_dimension=512):
+    def __init__(self, tower_class, target_tower_pretrained_model_name_or_path, context_tower_pretrained_model_name_or_path=None, output_encode_dimension=100):
         super(TwoTowerICT, self).__init__()
         assert target_tower_pretrained_model_name_or_path is not None, "Target tower pretrained model must me specified!"
         if context_tower_pretrained_model_name_or_path is None:
             context_tower_pretrained_model_name_or_path = target_tower_pretrained_model_name_or_path
-        self.target_encoder = DistilBertForClsEmbedding.from_pretrained(target_tower_pretrained_model_name_or_path, task_specific_params={'cls_embedding_dimension': output_encode_dimension})
-        self.context_encoder = DistilBertForClsEmbedding.from_pretrained(context_tower_pretrained_model_name_or_path, task_specific_params={'cls_embedding_dimension': output_encode_dimension})
+        self.target_encoder = tower_class.from_pretrained(target_tower_pretrained_model_name_or_path, task_specific_params={'cls_embedding_dimension': output_encode_dimension})
+        self.context_encoder = tower_class.from_pretrained(context_tower_pretrained_model_name_or_path, task_specific_params={'cls_embedding_dimension': output_encode_dimension})
         self.loss_fn = torch.nn.CrossEntropyLoss()
     
     def forward(self, target, target_mask, context, context_mask, correct_class):
