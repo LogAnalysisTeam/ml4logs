@@ -10,39 +10,56 @@ if __name__ == '__main__':
     #     'LogEncoder_from_2T_Eps_1_Combined_20210401_max-avg_3_epochs_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100'
     # ]
 
-    model_names = [
-        'LogEncoder_from_1T_Eps_1_M_basic_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
-        'LogEncoder_from_1T_Eps_1_M_chunked_by_blocks_min3_max10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
-        'LogEncoder_from_1T_Eps_1_M_time_ordered_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
-        'LogEncoder_from_2T_Eps_1_M_basic_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
-        'LogEncoder_from_2T_Eps_1_M_chunked_by_blocks_min3_max10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
-        'LogEncoder_from_2T_Eps_1_M_time_ordered_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
-        'LogEncoder_from_1T_Eps_1_Combined_20210401_concat-to-max_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
-        'LogEncoder_from_1T_Eps_1_Combined_20210401_smart-average_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
-        'LogEncoder_from_2T_Eps_1_Combined_20210401_concat-to-max_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
-        'LogEncoder_from_2T_Eps_1_Combined_20210401_smart-average_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
-        'LogEncoder_from_1T_Eps_1_Combined_20210401_concat-to-max_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
-        'LogEncoder_from_1T_Eps_1_Combined_20210401_smart-average_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
-        'LogEncoder_from_2T_Eps_1_Combined_20210401_concat-to-max_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
-        'LogEncoder_from_2T_Eps_1_Combined_20210401_smart-average_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100'
-    ]
+    # model_names = [
+    #     'LogEncoder_from_1T_Eps_1_M_basic_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_1T_Eps_1_M_chunked_by_blocks_min3_max10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_1T_Eps_1_M_time_ordered_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_2T_Eps_1_M_basic_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_2T_Eps_1_M_chunked_by_blocks_min3_max10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_2T_Eps_1_M_time_ordered_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_1T_Eps_1_Combined_20210401_concat-to-max_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_1T_Eps_1_Combined_20210401_smart-average_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_2T_Eps_1_Combined_20210401_concat-to-max_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_2T_Eps_1_Combined_20210401_smart-average_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_1T_Eps_1_Combined_20210401_concat-to-max_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_1T_Eps_1_Combined_20210401_smart-average_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_2T_Eps_1_Combined_20210401_concat-to-max_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100',
+    #     'LogEncoder_from_2T_Eps_1_Combined_20210401_smart-average_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100'
+    # ]
+
+    # model_names = [
+    #     "fasttext_from_no_timestamps_train-data-HDFS1-cv1-1-time-ordered"
+    # ]
+
+    # model_deps = {
+    #     "LogEncoder_from_1T_Eps_1_M_basic_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317355,2317356,2317357",
+    #     "LogEncoder_from_1T_Eps_1_M_chunked_by_blocks_min3_max10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317358,2317359,2317360",
+    #     "LogEncoder_from_1T_Eps_1_M_time_ordered_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317361,2317362,2317363",
+    #     "LogEncoder_from_2T_Eps_1_M_basic_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317364,2317365,2317366",
+    #     "LogEncoder_from_2T_Eps_1_M_chunked_by_blocks_min3_max10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317367,2317368,2317369",
+    #     "LogEncoder_from_2T_Eps_1_M_time_ordered_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317370,2317371,2317372",
+    #     "LogEncoder_from_1T_Eps_1_Combined_20210401_concat-to-max_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317373,2317374,2317375",
+    #     "LogEncoder_from_1T_Eps_1_Combined_20210401_smart-average_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317376,2317377,2317378",
+    #     "LogEncoder_from_2T_Eps_1_Combined_20210401_concat-to-max_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317379,2317380,2317381",
+    #     "LogEncoder_from_2T_Eps_1_Combined_20210401_smart-average_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317382,2317383,2317384",
+    #     "LogEncoder_from_1T_Eps_1_Combined_20210401_concat-to-max_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317385,2317386,2317387",
+    #     "LogEncoder_from_1T_Eps_1_Combined_20210401_smart-average_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317388,2317389,2317390",
+    #     "LogEncoder_from_2T_Eps_1_Combined_20210401_concat-to-max_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317391,2317392,2317393",
+    #     "LogEncoder_from_2T_Eps_1_Combined_20210401_smart-average_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317394,2317395,2317396"
+    # }
+
+    # model_deps = {
+    #     "fasttext_from_no_timestamps_train-data-HDFS1-cv1-1-time-ordered": "--dependency=afterok:2321473,2321474,2321475"
+    # }
 
     model_deps = {
-        "LogEncoder_from_1T_Eps_1_M_basic_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317355,2317356,2317357",
-        "LogEncoder_from_1T_Eps_1_M_chunked_by_blocks_min3_max10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317358,2317359,2317360",
-        "LogEncoder_from_1T_Eps_1_M_time_ordered_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317361,2317362,2317363",
-        "LogEncoder_from_2T_Eps_1_M_basic_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317364,2317365,2317366",
-        "LogEncoder_from_2T_Eps_1_M_chunked_by_blocks_min3_max10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317367,2317368,2317369",
-        "LogEncoder_from_2T_Eps_1_M_time_ordered_chunked_10_Seed-42_T-len_512_C-len_512_Tr-batch_64_Ev-b_64_O-dim_100": "--dependency=afterok:2317370,2317371,2317372",
-        "LogEncoder_from_1T_Eps_1_Combined_20210401_concat-to-max_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317373,2317374,2317375",
-        "LogEncoder_from_1T_Eps_1_Combined_20210401_smart-average_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317376,2317377,2317378",
-        "LogEncoder_from_2T_Eps_1_Combined_20210401_concat-to-max_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317379,2317380,2317381",
-        "LogEncoder_from_2T_Eps_1_Combined_20210401_smart-average_epochs-5_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317382,2317383,2317384",
-        "LogEncoder_from_1T_Eps_1_Combined_20210401_concat-to-max_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317385,2317386,2317387",
-        "LogEncoder_from_1T_Eps_1_Combined_20210401_smart-average_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317388,2317389,2317390",
-        "LogEncoder_from_2T_Eps_1_Combined_20210401_concat-to-max_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317391,2317392,2317393",
-        "LogEncoder_from_2T_Eps_1_Combined_20210401_smart-average_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2317394,2317395,2317396"
+        "LogEncoder_from_RobertaCls_distilroberta-base_1T_Combined_20210401_roberta_concat-to-max_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2321657,2321658,2321659",
+        "LogEncoder_from_RobertaCls_distilroberta-base_1T_Combined_20210401_roberta_smart-average_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2321660,2321661,2321662",
+        "LogEncoder_from_RobertaCls_distilroberta-base_2T_Combined_20210401_roberta_concat-to-max_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2321663,2321664,2321665",
+        "LogEncoder_from_RobertaCls_distilroberta-base_2T_Combined_20210401_roberta_smart-average_epochs-3_seed-43_Seed-42_T-len_512_C-len_512_Tr-batch_32_Ev-b_64_O-dim_100": "--dependency=afterok:2321666,2321667,2321668"
     }
+
+    model_names = list(model_deps.keys())
 
     train_basepath = Path('/home/cernypro/dev/source/ml4logs/data/interim/no_timestamps_train-data-HDFS1-cv1-1')
     val_basepath = Path('/home/cernypro/dev/source/ml4logs/data/interim/no_timestamps_val-data-HDFS1-cv1-1')

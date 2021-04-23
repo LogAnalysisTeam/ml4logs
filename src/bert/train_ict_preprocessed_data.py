@@ -58,7 +58,7 @@ def run_experiment(config):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
-    training_args = TrainingArguments(output_dir=f"../../models/{RUN_NAME.replace(' ', '_')}",
+    training_args = TrainingArguments(output_dir=f"../../models/ICT/{RUN_NAME.replace(' ', '_')}",
                                       fp16=config.fp16,
                                       num_train_epochs=config.epochs,
                                       per_device_eval_batch_size=config.eval_batch_size, 
@@ -88,7 +88,7 @@ def run_experiment(config):
 
     trainer.train(resume_from_checkpoint=config.checkpoint_directory)
     trainer.save_model()
-    model.save_encoder(RUN_NAME.replace(' ', '_'), Path('../../models/'))
+    model.save_encoder(RUN_NAME.replace(' ', '_'), Path('../../models/encoders'))
     
 
 def main():
