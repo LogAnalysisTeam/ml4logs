@@ -43,3 +43,6 @@ bgl_100k:
 
 thunderbird_100k:
 	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/thunderbird_100k.batch"
+
+thunderbird:
+	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/thunderbird.batch"

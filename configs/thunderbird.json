@@ -9,26 +9,20 @@
         {
             "action": "extract",
             "in_path": "data/raw/Thunderbird.tar.gz",
-            "out_dir": "data/raw/Thunderbird_100k"
-        },
-        {
-            "action": "head",
-            "logs_path": "data/raw/Thunderbird_100k/Thunderbird.log",
-            "logs_head_path": "data/raw/Thunderbird_100k/Thunderbird.log",
-            "n_rows": 100000
+            "out_dir": "data/raw/Thunderbird",
         },
         {
             "action": "prepare",
             "dataset": "Thunderbird",
-            "in_dir": "data/raw/Thunderbird_100k",
-            "logs_path": "data/interim/Thunderbird_100k/logs.txt",
-            "labels_path": "data/interim/Thunderbird_100k/labels.npy",
-            "timedeltas_path": "data/interim/Thunderbird_100k/timedeltas.npy"
+            "in_dir": "data/raw/Thunderbird",
+            "logs_path": "data/interim/Thunderbird/logs.txt",
+            "labels_path": "data/interim/Thunderbird/labels.npy",
+            "timedeltas_path": "data/interim/Thunderbird/timedeltas.npy"
         },
         {
             "action": "train_fasttext",
-            "logs_path": "data/interim/Thunderbird_100k/logs.txt",
-            "model_path": "models/embeddings/Thunderbird_100k/fasttext_skipgram.bin",
+            "logs_path": "data/interim/Thunderbird/logs.txt",
+            "model_path": "models/embeddings/Thunderbird/fasttext_skipgram.bin",
             "model_args": {
                 "dim": 100,
                 "minCount": 10000,
@@ -40,28 +34,28 @@
         },
         {
             "action": "preprocess_fasttext",
-            "logs_path": "data/interim/Thunderbird_100k/logs.txt",
-            "model_path": "models/embeddings/Thunderbird_100k/fasttext_skipgram.bin",
-            "embeddings_path": "data/interim/Thunderbird_100k/fasttext.npy"
+            "logs_path": "data/interim/Thunderbird/logs.txt",
+            "model_path": "models/embeddings/Thunderbird/fasttext_skipgram.bin",
+            "embeddings_path": "data/interim/Thunderbird/fasttext.npy"
         },
         {
             "action": "merge_features",
             "features_paths": [
-                "data/interim/Thunderbird_100k/fasttext.npy",
-                "data/interim/Thunderbird_100k/timedeltas.npy"
+                "data/interim/Thunderbird/fasttext.npy",
+                "data/interim/Thunderbird/timedeltas.npy"
             ],
-            "merged_path": "data/interim/Thunderbird_100k/fasttext-timedeltas.npy"
+            "merged_path": "data/interim/Thunderbird/fasttext-timedeltas.npy"
         },
         {
             "action": "aggregate_by_lines",
-            "features_path": "data/interim/Thunderbird_100k/fasttext-timedeltas.npy",
-            "labels_path": "data/interim/Thunderbird_100k/labels.npy",
-            "dataset_path": "data/processed/Thunderbird_100k/fasttext.npz"
+            "features_path": "data/interim/Thunderbird/fasttext-timedeltas.npy",
+            "labels_path": "data/interim/Thunderbird/labels.npy",
+            "dataset_path": "data/processed/Thunderbird/fasttext.npz"
         },
         {
             "action": "train_test_models",
-            "dataset_path": "data/processed/Thunderbird_100k/fasttext.npz",
-            "stats_path": "reports/results/Thunderbird_100k-skipgram-loglizer.json",
+            "dataset_path": "data/processed/Thunderbird/fasttext.npz",
+            "stats_path": "reports/results/Thunderbird-skipgram-loglizer.json",
             "train_size": 0.2,
             "seed": 14235,
             "models": [

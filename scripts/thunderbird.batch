@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH --partition=cpu
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=64G
+#SBATCH --job-name thunderbird
+#SBATCH --output .thunderbird_%j.out
+
+if [ -f "${PROJECT_DIR}/init_environment.sh" ]; then
+    source "${PROJECT_DIR}/init_environment.sh"
+fi
+
+"${ML4LOGS_PYTHON}" -m ml4logs "${PROJECT_DIR}/configs/thunderbird.json"
