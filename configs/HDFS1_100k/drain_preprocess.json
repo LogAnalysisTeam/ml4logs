@@ -2,6 +2,7 @@
     "pipeline": [
         {
             "action": "parse_ibm_drain",
+            "skip": false,
             "data_dir": "data/interim/HDFS1_100k",
             "pairs": [
                 {"logs_name": "train/data.log", "eventids_name": "train/ibm_drain_eventids.npy"},
@@ -15,7 +16,6 @@
         {
             "action": "aggregate_by_blocks",
             "features_path": "data/interim/HDFS1_100k/train/ibm_drain_eventids.npy",
-            "data_path": "data/interim/HDFS1_100k/train/data.log",
             "labels_path": "data/interim/HDFS1_100k/train/labels.csv",
             "save_transform_path": "data/interim/HDFS1_100k/ibm_drain-aggregate_transform.npz",
             "dataset_path": "data/processed/HDFS1_100k/train/ibm_drain.npz",
@@ -24,7 +24,6 @@
         {
             "action": "aggregate_by_blocks",
             "features_path": "data/interim/HDFS1_100k/train/cv1-1/ibm_drain_eventids.npy",
-            "data_path": "data/interim/HDFS1_100k/train/cv1-1/data.log",
             "labels_path": "data/interim/HDFS1_100k/train/cv1-1/labels.csv",
             "load_transform_path": "data/interim/HDFS1_100k/ibm_drain-aggregate_transform.npz",
             "dataset_path": "data/processed/HDFS1_100k/train/cv1-1/ibm_drain.npz",
@@ -33,7 +32,6 @@
         {
             "action": "aggregate_by_blocks",
             "features_path": "data/interim/HDFS1_100k/test/ibm_drain_eventids.npy",
-            "data_path": "data/interim/HDFS1_100k/test/data.log",
             "labels_path": "data/interim/HDFS1_100k/test/labels.csv",
             "load_transform_path": "data/interim/HDFS1_100k/ibm_drain-aggregate_transform.npz",
             "dataset_path": "data/processed/HDFS1_100k/test/ibm_drain.npz",
@@ -42,7 +40,6 @@
         {
             "action": "aggregate_by_blocks",
             "features_path": "data/interim/HDFS1_100k/val/cv1-1/ibm_drain_eventids.npy",
-            "data_path": "data/interim/HDFS1_100k/val/cv1-1/data.log",
             "labels_path": "data/interim/HDFS1_100k/val/cv1-1/labels.csv",
             "load_transform_path": "data/interim/HDFS1_100k/ibm_drain-aggregate_transform.npz",
             "dataset_path": "data/processed/HDFS1_100k/val/cv1-1/ibm_drain.npz",

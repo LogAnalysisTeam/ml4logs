@@ -4,7 +4,7 @@
             "action": "train_test_models",
             "train_path": "data/processed/HDFS1/train/cv1-1/fasttext_timedeltas_minmax_blockmax.npz",
             "test_path": "data/processed/HDFS1/test/fasttext_timedeltas_minmax_blockmax.npz",
-            "stats_path": "reports/results/HDFS1/fasttext_timedeltas_max-unsupervised-loglizer.json",
+            "stats_path": "reports/results/HDFS1/fasttext_timedeltas_minmax_blockmax-unsupervised-loglizer.json",
             "models": [
                 {
                     "name": "isolation_forest_sklearn",
@@ -40,7 +40,7 @@
             "skip": "true",
             "train_path": "data/processed/HDFS1/train/cv1-1/fasttext_timedeltas_minmax_blockmax.npz",
             "test_path": "data/processed/HDFS1/test/fasttext_timedeltas_minmax_blockmax.npz",
-            "stats_path": "reports/results/HDFS1/fasttext_timedeltas_max-loglizer.json",
+            "stats_path": "reports/results/HDFS1/fasttext_timedeltas_minmax_blockmax-loglizer.json",
             "models": [
                 {
                     "name": "logistic_regression",

@@ -50,6 +50,7 @@ class CountFeatureExtractor(TransformerMixin):
 
     def fit_transform(self, data: Dict, y=None, **fit_params) -> np.ndarray:
         dataframe = self._create_dataframe(data)
+        logger.info(f"Created DataFrame: {dataframe.shape}")
 
         self.feature_names = dataframe.columns
 

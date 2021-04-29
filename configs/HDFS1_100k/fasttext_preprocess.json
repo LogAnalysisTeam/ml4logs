@@ -55,7 +55,7 @@
                 "data/interim/HDFS1_100k/train/cv1-1/fasttext-skipgram-d100-n3-6_minmax.npy",
                 "data/interim/HDFS1_100k/train/cv1-1/timedeltas_minmax.npy"
             ],
-            "merged_path": "data/interim/HDFS1_100k/train/cv1-1/fasttext_timedeltas_minmax.npy"
+            "merged_path": "data/processed/HDFS1_100k/train/cv1-1/fasttext_timedeltas_minmax.npy"
         },
         {
             "action": "merge_features",
@@ -64,7 +64,7 @@
                 "data/interim/HDFS1_100k/val/cv1-1/fasttext-skipgram-d100-n3-6_minmax.npy",
                 "data/interim/HDFS1_100k/val/cv1-1/timedeltas_minmax.npy"
             ],
-            "merged_path": "data/interim/HDFS1_100k/val/cv1-1/fasttext_timedeltas_minmax.npy"
+            "merged_path": "data/processed/HDFS1_100k/val/cv1-1/fasttext_timedeltas_minmax.npy"
         },
         {
             "action": "merge_features",
@@ -73,14 +73,13 @@
                 "data/interim/HDFS1_100k/test/fasttext-skipgram-d100-n3-6_minmax.npy",
                 "data/interim/HDFS1_100k/test/timedeltas_minmax.npy"
             ],
-            "merged_path": "data/interim/HDFS1_100k/test/fasttext_timedeltas_minmax.npy"
+            "merged_path": "data/processed/HDFS1_100k/test/fasttext_timedeltas_minmax.npy"
         },
         {
             "action": "aggregate_by_blocks",
             "skip": false,
             "method": "max",
-            "features_path": "data/interim/HDFS1_100k/train/cv1-1/fasttext_timedeltas_minmax.npy",
-            "data_path": "data/interim/HDFS1_100k/train/cv1-1/data.log",
+            "features_path": "data/processed/HDFS1_100k/train/cv1-1/fasttext_timedeltas_minmax.npy",
             "labels_path": "data/interim/HDFS1_100k/train/cv1-1/labels.csv",
             "dataset_path": "data/processed/HDFS1_100k/train/cv1-1/fasttext_timedeltas_minmax_blockmax.npz"
         },
@@ -88,8 +87,7 @@
             "action": "aggregate_by_blocks",
             "skip": false,
             "method": "max",
-            "features_path": "data/interim/HDFS1_100k/val/cv1-1/fasttext_timedeltas_minmax.npy",
-            "data_path": "data/interim/HDFS1_100k/val/cv1-1/data.log",
+            "features_path": "data/processed/HDFS1_100k/val/cv1-1/fasttext_timedeltas_minmax.npy",
             "labels_path": "data/interim/HDFS1_100k/val/cv1-1/labels.csv",
             "dataset_path": "data/processed/HDFS1_100k/val/cv1-1/fasttext_timedeltas_minmax_blockmax.npz"
         },
@@ -97,8 +95,7 @@
             "action": "aggregate_by_blocks",
             "skip": false,
             "method": "max",
-            "features_path": "data/interim/HDFS1_100k/test/fasttext_timedeltas_minmax.npy",
-            "data_path": "data/interim/HDFS1_100k/test/data.log",
+            "features_path": "data/processed/HDFS1_100k/test/fasttext_timedeltas_minmax.npy",
             "labels_path": "data/interim/HDFS1_100k/test/labels.csv",
             "dataset_path": "data/processed/HDFS1_100k/test/fasttext_timedeltas_minmax_blockmax.npz"
         }

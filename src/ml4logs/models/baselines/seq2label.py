@@ -2,6 +2,7 @@
 # === Standard library ===
 import logging
 import pathlib
+from pathlib import Path
 import json
 
 # === Thirdparty ===
@@ -127,16 +128,18 @@ def train_test_seq2label(args):
 
     torch.manual_seed(args['seed'])
 
-    features_path = pathlib.Path(args['features_path'])
-    blocks_path = pathlib.Path(args['blocks_path'])
-    labels_path = pathlib.Path(args['labels_path'])
-    stats_path = pathlib.Path(args['stats_path'])
+    train_path = Path(args['train_path'])
+    val_path = Path(args['val_path'])
+    test_path = Path(args['test_path'])
+    stats_path = Path(args['stats_path'])
 
     ml4logs.utils.mkdirs(files=[stats_path])
 
     import os
     logger.info(f"current path: {os.getcwd()}")
-    logger.info(f"features_path: {features_path}")
+    logger.info(f"train_path: {train_path}")
+    logger.info(f"val_path: {val_path}")
+    logger.info(f"test_path: {test_path}")
 
     features = np.load(features_path).astype(np.float32)
     blocks = np.load(blocks_path)

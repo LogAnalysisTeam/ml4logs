@@ -4,6 +4,7 @@ from collections import defaultdict, OrderedDict
 from datetime import datetime
 import logging
 import pathlib
+from pathlib import Path
 import re
 import typing
 from typing import Generator, Iterable, List, Dict
@@ -15,8 +16,7 @@ import pandas as pd
 
 # === Local ===
 import ml4logs
-from ml4logs.data.hdfs import load_data
-from ml4logs.features.utils import load_features_as_dict
+from ml4logs.data.hdfs import load_data_as_dict
 
 # based on https://github.com/LogAnalysisTeam/methods4logfiles/blob/main/src/features/hdfs.py
 
@@ -26,16 +26,16 @@ logger = logging.getLogger(__name__)
 
 # ===== FUNCTIONS =====
 def extract_timedeltas(args):
-    data_dir = pathlib.Path(args['data_dir'])
+    data_dir = Path(args['data_dir'])
     ml4logs.utils.mkdirs(folders=[data_dir])
 
     logger.info('Starting time delta extraction')
     for pair in args["pairs"]:
-        logs_path = pathlib.Path(data_dir, pair["logs_name"])
-        timedeltas_path = pathlib.Path(data_dir, pair["timedeltas_name"])
+        logs_path = Path(data_dir, pair["logs_name"])
+        timedeltas_path = Path(data_dir, pair["timedeltas_name"])
         logger.info(f'Processing: {logs_path}')
 
-        data = load_data(logs_path)
+        data = load_data_as_dict(logs_path)
         tdeltas = []
         nlines = 0
         for block_id, log_lines in data.items():

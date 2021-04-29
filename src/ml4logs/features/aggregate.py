@@ -3,6 +3,7 @@
 from collections import defaultdict, OrderedDict
 import logging
 import pathlib
+from pathlib import Path
 import typing
 
 # === Thirdparty ===
@@ -12,7 +13,7 @@ import pandas as pd
 
 # === Local ===
 import ml4logs
-from ml4logs.data.hdfs import load_data, load_labels
+from ml4logs.data.hdfs import load_labels
 from ml4logs.features.count_features import CountFeatureExtractor
 from ml4logs.features.utils import load_features_as_dict
 
@@ -30,18 +31,18 @@ def _check_groups_and_labels(groups, labels):
 def aggregate_by_blocks(args):
     assert args["method"] in ["bow", "tf-idf", "max"]
 
-    features_path = pathlib.Path(args['features_path'])
-    data_path = pathlib.Path(args['data_path'])
-    labels_path = pathlib.Path(args['labels_path'])
-    dataset_path = pathlib.Path(args['dataset_path'])
+    features_path = Path(args['features_path'])
+    labels_path = Path(args['labels_path'])
+    dataset_path = Path(args['dataset_path'])
 
     ml4logs.utils.mkdirs(files=[dataset_path])
 
-    logger.info(f'Looding features grouped by blocks,\n data_path: {data_path}, features_path: {features_path}')
-    groups = load_features_as_dict(data_path, features_path)
+    logger.info(f'Loading features grouped by blocks,\n labels_path: {labels_path}, features_path: {features_path}')
+    groups = load_features_as_dict(labels_path, features_path)
+    logger.info(f"Loaded {len(groups)} groups")
     
     if "load_transform_path" in args: # read a once fitted transform, e.g., on training data
-        load_transform_path = pathlib.Path(args['load_transform_path'])
+        load_transform_path = Path(args['load_transform_path'])
         logger.info(f"Loading aggregation transform (CountFeatureExtractor) as {load_transform_path}")
         fe = joblib.load(load_transform_path)
         X = fe.transform(groups)
@@ -49,9 +50,10 @@ def aggregate_by_blocks(args):
     else:
         if args["method"] in ["bow", "tf-idf"]:
             fe = CountFeatureExtractor(method=args["method"], preprocessing="mean")
+            logger.info("Fitting CountFeatureExtractor for the groups")
             X = fe.fit_transform(groups)
             if "save_transform_path" in args:
-                save_transform_path = pathlib.Path(args['save_transform_path'])
+                save_transform_path = Path(args['save_transform_path'])
                 logger.info(f"Saving aggregation transform (CountFeatureExtractor) as {save_transform_path}")
                 joblib.dump(fe, save_transform_path)
         else:
@@ -76,9 +78,9 @@ def aggregate_by_blocks(args):
 
 
 def aggregate_by_lines(args):
-    features_path = pathlib.Path(args['features_path'])
-    labels_path = pathlib.Path(args['labels_path'])
-    dataset_path = pathlib.Path(args['dataset_path'])
+    features_path = Path(args['features_path'])
+    labels_path = Path(args['labels_path'])
+    dataset_path = Path(args['dataset_path'])
 
     ml4logs.utils.mkdirs(files=[dataset_path])
 

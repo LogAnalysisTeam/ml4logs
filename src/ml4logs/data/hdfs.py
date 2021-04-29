@@ -6,6 +6,7 @@ import datetime
 import logging
 import os
 import pathlib
+from pathlib import Path
 import re
 import typing
 from typing import Dict, Union, Generator
@@ -56,9 +57,12 @@ class HDFSImporter:
         :return:
         """
         labels = self.load_labels('anomaly_label.csv')
-        data = self.load_data('HDFS.log')
+        data = self.load_data_as_dict('HDFS.log')
         # remove labels for blocks not in data (this might happen if using only subset of data for debugging, e.g., HDFS1_100k) 
         labels = labels[labels["BlockId"].isin(data.keys())]
+        _check_data_with_labels(data, labels) # check that data and labels are aligned
+        block_sizes = [len(data[block_id]) for block_id in data.keys()]
+        labels["BlockSize"] = block_sizes
 
         train_data, test_data, train_labels, test_labels = _stratified_train_test_split(data, labels, seed=self.SEED,
                                                                                         test_size=test_size)
@@ -85,25 +89,30 @@ class HDFSImporter:
                 yield train_data, test_data, train_labels, test_labels
 
     def load_labels(self, file_name: str) -> pd.DataFrame:
-        return load_labels(pathlib.Path(self.data_dir, file_name))
+        return load_labels(Path(self.data_dir, file_name))
 
 
-    def load_data(self, file_name: str) -> typing.OrderedDict:
-        return load_data(pathlib.Path(self.data_dir, file_name))
+    def load_data_as_dict(self, file_name: str) -> typing.OrderedDict:
+        return load_data_as_dict(Path(self.data_dir, file_name))
 
 
     def save_logs_to_file(self, data: Dict, file_name: str):
-        file_path = pathlib.Path(self.output_dir, file_name)
+        file_path = Path(self.output_dir, file_name)
         ml4logs.utils.mkdirs(files=[file_path])
         with open(file_path, 'w') as f:
             for logs in data.values():
                 f.writelines(logs)
 
     def save_labels_to_file(self, data: pd.DataFrame, file_name: str):
-        file_path = pathlib.Path(self.output_dir, file_name)
+        file_path = Path(self.output_dir, file_name)
         ml4logs.utils.mkdirs(files=[file_path])
-        data.replace({True: 'Anomaly', False: 'Normal'}).to_csv(
-            file_path, index=False)
+
+        data = data.copy()
+        block_sizes = data["BlockSize"].values
+        block_offsets = np.insert(block_sizes.cumsum(), 0, 0)[:-1]
+        data["BlockOffset"] = block_offsets
+        data["Label"] = data["Label"].replace({True: 'Anomaly', False: 'Normal'})
+        data.to_csv(file_path, index=False)
 
 
 # --- HELPER FUNCIONS
@@ -113,7 +122,7 @@ def load_labels(file_path: str) -> pd.DataFrame:
                         'Label': lambda x: True if x == 'Anomaly' else False})
     return df
 
-def load_data(file_path: str) -> typing.OrderedDict:
+def load_data_as_dict(file_path: str) -> typing.OrderedDict:
     traces = OrderedDict()
 
     # pattern eg. blk_-1608999687919862906
@@ -126,6 +135,13 @@ def load_data(file_path: str) -> typing.OrderedDict:
             tlst.append(line)
             traces[block_id] = tlst
     return traces
+
+def _check_data_with_labels(data: typing.OrderedDict, labels: pd.DataFrame):
+    data_block_ids = list(data.keys())
+    # remove labels for blocks not in data (this might happen if using only subset of data for debugging, e.g., HDFS1_100k) 
+    label_block_ids = labels[labels["BlockId"].isin(data.keys())]["BlockId"]
+    assert all(data_block_ids == label_block_ids)
+
 
 def _find_block_id_in_log(regex: re.Pattern, line: str) -> str:
     res = regex.search(line)
