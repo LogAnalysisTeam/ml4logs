@@ -27,8 +27,8 @@ def load_features(features_path: str) -> np.ndarray:
 
     
 def load_features_as_dict(labels_path: str, features_path: str) -> typing.OrderedDict:
-    labels = load_labels(labels_path) # BlockId -> list of log lines OrderedDict, the block order corresponds to the order of features and labels
     features = load_features(features_path) # the order of features is same as the order of data
+    labels = load_labels(labels_path)
 
     groups = OrderedDict()
     for row in labels.itertuples():

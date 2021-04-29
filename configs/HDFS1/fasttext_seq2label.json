@@ -2,10 +2,14 @@
     "pipeline": [
         {
             "action": "train_test_seq2label",
-            "features_path": "data/interim/HDFS1/fasttext-timedeltas.npy",
-            "blocks_path": "data/interim/HDFS1/blocks.npy",
-            "labels_path": "data/interim/HDFS1/labels.npy",
-            "stats_path": "reports/results/HDFS1-skipgram-seq2label.json",
+            "train_path": "data/processed/HDFS1/train/cv1-1/fasttext_timedeltas_minmax.npy",
+            "train_label_path": "data/interim/HDFS1/train/cv1-1/labels.csv",
+            "val_path": "data/processed/HDFS1/val/cv1-1/fasttext_timedeltas_minmax.npy",
+            "val_label_path": "data/interim/HDFS1/val/cv1-1/labels.csv",
+            "test_path": "data/processed/HDFS1/test/fasttext_timedeltas_minmax.npy",
+            "test_label_path": "data/interim/HDFS1/test/labels.csv",
+            "stats_path": "reports/results/HDFS1/fasttext_timedeltas_minmax-seq2label.json",
+
             "model_kwargs": {
                 "n_lstm_layers": 1,
                 "n_hidden_linears": 2,
@@ -18,8 +22,6 @@
             "lr_scheduler_kwargs": {
                 "gamma": 0.9817
             },
-            "train_size": 0.4,
-            "validation_size": 0.2,
             "batch_size": 512,
             "epochs": 5,
             "device": "cuda",

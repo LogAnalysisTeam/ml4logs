@@ -1,5 +1,6 @@
 # ===== IMPORTS =====
 # === Standard library ===
+from collections import defaultdict, Counter
 import logging
 import pathlib
 from pathlib import Path
@@ -17,7 +18,8 @@ from sklearn.metrics import precision_recall_fscore_support
 
 # === Local ===
 import ml4logs
-
+from ml4logs.features.utils import load_features_as_dict
+from ml4logs.data.hdfs import load_labels
 
 # ===== GLOBALS =====
 logger = logging.getLogger(__name__)
@@ -96,27 +98,38 @@ class Seq2LabelModelTrainer:
             'f1': f1
         }
 
-    def _forward(self, inputs, outputs):
-        inputs = inputs.to(self._device)
-        outputs = outputs.to(self._device)
-        outputs, lengths = tutilsrnn.pad_packed_sequence(
-            outputs,
-            batch_first=True
-        )
+    def _forward(self, inputs, labels):
+        # gets data as created by `pad_collate()`
 
-        results = self._model(inputs)
-        results = tutilsrnn.pack_padded_sequence(
-            results,
+        inputs = inputs.to(self._device)
+        labels = labels.to(self._device)
+
+        # labels shape will be (batch_size, max_sequence_length)
+        # lengths will be (batch_size, ) tensor with actual sequence lengths
+        labels, lengths = tutilsrnn.pad_packed_sequence(
+            labels,
+            batch_first=True        )
+
+        # results will be (batch_size, max_sequence_length, 1) - there is a single output neuron
+        outputs = self._model(inputs)
+
+        # the network predicts even after actual sequence_length
+        # the following pack_padded and pad_packed will set all these predictions to 0
+        # so they do not mess with loss (targets are also padded b zeros)
+        outputs = tutilsrnn.pack_padded_sequence(
+            outputs,
             lengths,
             batch_first=True,
             enforce_sorted=False
         )
-        results, _ = tutilsrnn.pad_packed_sequence(
-            results,
+
+        outputs, _ = tutilsrnn.pad_packed_sequence(
+            outputs,
             batch_first=True
         )
 
-        return torch.squeeze(results), outputs
+        # squeeze removes the last dimension so we get (batch_size, max_sequence_length)
+        return torch.squeeze(outputs), labels
 
 
 # ===== FUNCTIONS =====
@@ -135,60 +148,29 @@ def train_test_seq2label(args):
 
     ml4logs.utils.mkdirs(files=[stats_path])
 
-    import os
-    logger.info(f"current path: {os.getcwd()}")
-    logger.info(f"train_path: {train_path}")
-    logger.info(f"val_path: {val_path}")
-    logger.info(f"test_path: {test_path}")
+    def load_split(input_path, label_path):
+        logger.info(
+            f'Loading split:\n\t"{args[input_path]}"\n\t"{args[label_path]}"')
+        labels = load_labels(args[label_path])
+        inputs = load_features_as_dict(args[label_path], args[input_path])
+        logger.info(
+            f" # input blocks: {len(inputs)}, labels shape: {labels.shape}")
+        return inputs, labels
 
-    features = np.load(features_path).astype(np.float32)
-    blocks = np.load(blocks_path)
-    labels = np.load(labels_path)
-    logger.info('Loaded features %s', features.shape)
-    logger.info('Loaded blocks %s', blocks.shape)
-    logger.info('Loaded labels %s', labels.shape)
+    train_blocks, train_labels = load_split("train_path", "train_label_path")
+    val_blocks, val_labels = load_split("val_path", "val_label_path")
+    test_blocks, test_labels = load_split("test_path", "test_label_path")
 
-    blocks_unique, blocks_counts = np.unique(blocks, return_counts=True)
-    blocks_used = blocks_unique[blocks_counts > 1]
-    logger.info('Blocks used %s', blocks_used.shape)
-    normal_blocks = blocks_used[labels[blocks_used] == NORMAL_LABEL]
-    test_abnormal_blocks = blocks_used[labels[blocks_used] == ABNORMAL_LABEL]
-    logger.info('Normal blocks %s, abnormal blocks %s',
-                normal_blocks.shape, test_abnormal_blocks.shape)
-    logger.info('Split with train size = %.2f', args['train_size'])
-    train_blocks, test_normal_blocks = train_test_split(
-        normal_blocks,
-        train_size=args['train_size']
-    )
-    logger.info('Split with validation size = %.2f', args['validation_size'])
-    test_blocks = np.concatenate((test_normal_blocks, test_abnormal_blocks))
-    train_blocks, validation_blocks = train_test_split(
-        train_blocks,
-        test_size=args['validation_size']
-    )
-    logger.info('Train normal blocks %s', train_blocks.shape)
-    logger.info('Validation normal blocks %s', validation_blocks.shape)
-    logger.info('Test normal blocks %s', test_normal_blocks.shape)
-    logger.info('Test abnormal blocks %s', test_abnormal_blocks.shape)
+    # originally implemented splits:
+    #   train - only normal blocks
+    #   val - only normal blocks
+    #   test - rest of normal blocks and all anomalous
 
-    scaler = StandardScaler()
-    logger.info('Fit StandardScaler with train blocks')
-    scaler.fit(features[np.isin(blocks, train_blocks)])
-    logger.info('Scale whole dataset')
-    features_scaled = scaler.transform(features)
+    train_dataset = create_sequence_dataset(train_blocks, train_labels)
+    validation_dataset = create_sequence_dataset(val_blocks, val_labels)
+    test_dataset = create_sequence_dataset(test_blocks, test_labels)
 
-    logger.info('Create sequence datasets')
-    values = {}
-    for block, array in zip(blocks, features_scaled):
-        list_ = values.setdefault(block, list())
-        list_.append(array)
-    values = {block: np.stack(arrays) for block, arrays in values.items()}
-    train_dataset = create_sequence_dataset(values, labels, train_blocks)
-    validation_dataset = create_sequence_dataset(
-        values, labels, validation_blocks)
-    test_dataset = create_sequence_dataset(values, labels, test_blocks)
-
-    logger.info('Create torch dataloaders')
+    logger.info('Creating Torch DataLoaders')
     loaders_kwargs = {
         'batch_size': args['batch_size'],
         'collate_fn': pad_collate,
@@ -199,9 +181,9 @@ def train_test_seq2label(args):
     validation_l = tdata.DataLoader(validation_dataset, **loaders_kwargs)
     test_l = tdata.DataLoader(test_dataset, **loaders_kwargs)
 
-    logger.info('Create model, optimizer, lr_scheduler and trainer')
+    logger.info('Creating model, optimizer, lr_scheduler and trainer')
     device = torch.device(args['device'])
-    f_dim = features.shape[-1]
+    f_dim = train_blocks[list(train_blocks.keys())[0]].shape[-1]
     trainer = Seq2LabelModelTrainer(
         device,
         f_dim,
@@ -215,11 +197,12 @@ def train_test_seq2label(args):
         'metrics': {'train': [], 'test': []}
     }
 
-    logger.info('Start training')
+    logger.info('Starting training')
     validation_loss = trainer.evaluate(validation_l)
     stats['metrics']['train'].append(
         {'epoch': 0, 'validation_loss': validation_loss})
     logger.info('Epoch: %3d | Validation loss: %.2f', 0, validation_loss)
+
     for epoch in range(1, args['epochs'] + 1):
         train_loss = trainer.train(train_l)
         validation_loss = trainer.evaluate(validation_l)
@@ -243,27 +226,37 @@ def train_test_seq2label(args):
             'F1-score = {f1:.2f}',
         ]).format(**info))
 
-    logger.info('Save metrics into \'%s\'', stats_path)
+    logger.info('Saving metrics into \'%s\'', stats_path)
     stats_path.write_text(json.dumps(stats, indent=4))
 
 
-def create_sequence_dataset(values, labels_, blocks):
+def create_sequence_dataset(blocks, labels_):
     inputs = []
     labels = []
-    for block in blocks:
-        inputs.append(values[block])
+    for block, label in zip(blocks.values(), labels_.Label.values):
+        inputs.append(block.astype(np.float32, copy=False))
         labels.append(
-            torch.ones(len(values[block]))
-            if labels_[block]
-            else torch.zeros(len(values[block]))
+            torch.ones(block.shape[0], dtype=torch.float32)
+            if label
+            else torch.zeros(block.shape[0], dtype=torch.float32)
         )
     return ml4logs.models.baselines.SequenceDataset(inputs, labels)
 
 
 def pad_collate(samples):
-    inputs, labels = tuple(zip(*samples))
+    # samples: list of (input,lable) tuples:
+    #   input is (block_size, feature_dim) numpy array 
+    #   lable is (block_size,) torch tensor
+
+    # get separate input and label array lists
+    inputs, labels = zip(*samples)
+    # logger.info(Counter([l.shape[0] for l in labels]))
+
+    # convert input numpy tensors to the torch ones
     inputs = tuple(map(torch.from_numpy, inputs))
-    # labels = tuple(map(torch.from_numpy, labels))
+
+    # pack everything
     inputs = tutilsrnn.pack_sequence(inputs, enforce_sorted=False)
     labels = tutilsrnn.pack_sequence(labels, enforce_sorted=False)
+
     return inputs, labels

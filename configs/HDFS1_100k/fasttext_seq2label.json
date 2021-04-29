@@ -2,9 +2,12 @@
     "pipeline": [
         {
             "action": "train_test_seq2label",
-            "train_path": "data/processed/HDFS1_100k/train/cv1-1/fasttext_timedeltas_minmax.npz",
-            "val_path": "data/processed/HDFS1_100k/val/cv1-1/fasttext_timedeltas_minmax.npz",
-            "test_path": "data/processed/HDFS1_100k/test/fasttext_timedeltas_minmax.npz",
+            "train_path": "data/processed/HDFS1_100k/train/cv1-1/fasttext_timedeltas_minmax.npy",
+            "train_label_path": "data/interim/HDFS1_100k/train/cv1-1/labels.csv",
+            "val_path": "data/processed/HDFS1_100k/val/cv1-1/fasttext_timedeltas_minmax.npy",
+            "val_label_path": "data/interim/HDFS1_100k/val/cv1-1/labels.csv",
+            "test_path": "data/processed/HDFS1_100k/test/fasttext_timedeltas_minmax.npy",
+            "test_label_path": "data/interim/HDFS1_100k/test/labels.csv",
             "stats_path": "reports/results/HDFS1_100k/fasttext_timedeltas_minmax-seq2label.json",
 
             "model_kwargs": {

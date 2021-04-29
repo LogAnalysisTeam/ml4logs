@@ -42,13 +42,14 @@ def main():
     logger.info('Read config file \'%s\'', args.config_path)
     config = json.loads(args.config_path.read_text())
 
-    logger.info('Execute pipeline')
+    logger.info('Executing pipeline')
     for step in config['pipeline']:
         if step.get('skip', False):
-            logger.info('===== Skip \'%s\' step =====', step['action'])
+            logger.info('===== Skipping \'%s\' step =====', step['action'])
             continue
-        logger.info('===== Perform \'%s\' step =====', step['action'])
+        logger.info('===== Performing \'%s\' step =====', step['action'])
         COMMANDS[step['action']](step)
+    logger.info('Pipeline finished')
 
 
 if __name__ == '__main__':
