@@ -35,11 +35,11 @@ def preprocess_fasttext(args):
 
     ml4logs.utils.mkdirs(files=[embeddings_path])
 
-    logger.info('Load fasttext model from \'%s\'', model_path)
+    logger.info('Loading fastText model from \'%s\'', model_path)
     model = fasttext.load_model(str(model_path))
     n_lines = ml4logs.utils.count_file_lines(logs_path)
     step = n_lines // 10
-    logger.info('Start preprocessing using fasttext')
+    logger.info('Starting preprocessing using fastText')
     embeddings = []
     with logs_path.open() as logs_in_f:
         for i, line in enumerate(logs_in_f):
@@ -48,5 +48,5 @@ def preprocess_fasttext(args):
             if i % step <= 0:
                 logger.info('Processed %d / %d lines', i, n_lines)
     embeddings = np.stack(embeddings)
-    logger.info('Save embeddings into \'%s\'', embeddings_path)
+    logger.info('Saving embeddings into \'%s\'', embeddings_path)
     np.save(embeddings_path, embeddings)

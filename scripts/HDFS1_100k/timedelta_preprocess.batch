@@ -1,15 +1,15 @@
 #!/bin/bash
 #SBATCH --partition=cpufast
-#SBATCH --time=00:30:00
+#SBATCH --time=00:10:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
-#SBATCH --job-name hdfs1_100k_drain_loglizer
-#SBATCH --output .hdfs1_100k_drain_loglizer.%j.out
+#SBATCH --job-name hdfs1_100k_timedelta_preprocess
+#SBATCH --output .hdfs1_100k_timedelta_preprocess.%j.out
 
 if [ -f "${PROJECT_DIR}/init_environment.sh" ]; then
     source "${PROJECT_DIR}/init_environment.sh"
 fi
 
-"${ML4LOGS_PYTHON}" -m ml4logs "${PROJECT_DIR}/configs/HDFS1_100k/drain_loglizer.json"
+"${ML4LOGS_PYTHON}" -m ml4logs "${PROJECT_DIR}/configs/HDFS1_100k/timedelta_preprocess.json"

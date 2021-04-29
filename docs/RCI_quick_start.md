@@ -23,6 +23,13 @@ Acvtivate it:
 source ml4logs_env/bin/activate
 ```
 
+You might want to setup Jupyter kernel for the virtual environment:
+```bash
+pip install jupyter
+
+ipython kernel install --name "ml4logs_env" --user
+```
+
 Clone the repository:
 ```bash
 git clone git@github.com:LogAnalysisTeam/ml4logs.git

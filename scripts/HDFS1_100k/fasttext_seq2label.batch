@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem=32G
 #SBATCH --job-name hdfs1_100k_fasttext_seq2label
-#SBATCH --output .hdfs1_100k_fasttext_seq2label_%j.out
+#SBATCH --output .hdfs1_100k_fasttext_seq2label.%j.out
 
 if [ -f "${PROJECT_DIR}/init_environment.sh" ]; then
     source "${PROJECT_DIR}/init_environment.sh"

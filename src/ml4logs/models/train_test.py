@@ -7,12 +7,16 @@ import json
 
 # === Thirdparty ===
 import numpy as np
+
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import IsolationForest
+from sklearn.neighbors import LocalOutlierFactor
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
+
 from pyod.models.lof import LOF
 from pyod.models.ocsvm import OCSVM
 from pyod.models.iforest import IForest
@@ -35,8 +39,8 @@ class LinearSVCWrapper:
         self._linear_svc = LinearSVC(**kwargs)
         self._clf = CalibratedClassifierCV(self._linear_svc)
 
-    def fit(self, X, Y):
-        self._clf.fit(X, Y)
+    def fit(self, X, T):
+        self._clf.fit(X, T)
         return self
 
     def predict(self, X):
@@ -45,41 +49,97 @@ class LinearSVCWrapper:
     def predict_proba(self, X):
         return self._clf.predict_proba(X)
 
+class IForestWrapper:
+    def __init__(self, **kwargs):
+        self._model = IForest(**kwargs)
+
+    def fit(self, X, T):
+        # unsupervised learning Targets not used
+        self._model.fit(X)
+        return self
+
+    def predict(self, X):
+        Y =  self._model.predict(X)
+        return Y
+
+    def predict_proba(self, X):
+        probs = self._model.predict_proba(X)
+        return probs
+
+class IsolationForestWrapper:
+    def __init__(self, **kwargs):
+        self._model = IsolationForest(**kwargs)
+
+    def fit(self, X, T):
+        # unsupervised learning Targets not used
+        self._model.fit(X)
+        return self
+
+    def predict(self, X):
+        Y = (1 - (self._model.predict(X) + 1)/2).astype(np.int)
+        return Y
+
+    def predict_proba(self, X):
+        # TODO: not realy continuous probabilities! Fix!
+        # ps = self._model.score_samples(X).reshape(-1, 1)
+        probs = np.zeros([X.shape[0], 2])
+        Y = self.predict(X)
+        probs[:, 0] = 1 - Y
+        probs[:, 1] = Y
+        return probs
+
+class LOFWrapper:
+    def __init__(self, **kwargs):
+        self._model = LocalOutlierFactor(**kwargs)
+
+    def fit(self, X, T):
+        # LOF is not fit on training data, the fit is part of the prediction
+        return self
+
+    def predict(self, X):
+        Y = (1 - (self._model.fit_predict(X) + 1)/2).astype(np.int)
+        return Y
+
+    def predict_proba(self, X):
+        # TODO: not realy continuous probabilities! Fix!
+        # ps = self._model.score_samples(X).reshape(-1, 1)
+        probs = np.zeros([X.shape[0], 2])
+        Y = self.predict(X)
+        probs[:, 0] = 1 - Y
+        probs[:, 1] = Y
+        return probs
 
 # ===== CONSTANTS =====
 MODEL_CLASSES = {
     'logistic_regression': LogisticRegression,
     'decision_tree': DecisionTreeClassifier,
     'linear_svc': LinearSVCWrapper,
-    'lof': LOF,
     'one_class_svm': OCSVM,
-    'isolation_forest': IForest,
-    'pca': PCA
+
+    # unsupervised
+    'pca': PCA,
+    'isolation_forest': IForestWrapper,
+    'isolation_forest_sklearn': IsolationForestWrapper,
+    'lof': LOF,
+    'lof_sklearn': LOFWrapper,
 }
 
 
 # ===== FUNCTIONS =====
 def train_test_models(args):
-    dataset_path = pathlib.Path(args['dataset_path'])
+    train_path = pathlib.Path(args['train_path'])
+    test_path = pathlib.Path(args['test_path'])
     stats_path = pathlib.Path(args['stats_path'])
 
     ml4logs.utils.mkdirs(files=[stats_path])
 
-    logger.info('Load dataset from \'%s\'', dataset_path)
-    with np.load(dataset_path) as dataset_npz:
-        logger.info('Split with \'train size\' = %.2f', args['train_size'])
-        x_train, x_test, y_train, y_test = train_test_split(
-            dataset_npz['X'], dataset_npz['Y'],
-            train_size=args['train_size'],
-            stratify=dataset_npz['Y'],
-            random_state=args['seed']
-        )
+    train_npz = np.load(train_path)
+    x_train, y_train = train_npz['X'], train_npz['Y']
+    logger.info(f'Train data loaded from {train_path}, shapes X={x_train.shape} and Y={y_train.shape}')
 
-    scaler = StandardScaler()
-    logger.info('Scale train dataset using sklearn StandardScaler')
-    x_train_scaled = scaler.fit_transform(x_train)
-    logger.info('Scale test dataset using fitted sklearn StandardScaler')
-    x_test_scaled = scaler.transform(x_test)
+    test_npz = np.load(test_path)
+    x_test, y_test = test_npz['X'], test_npz['Y']
+    logger.info(f'Test data loaded from {test_path}, shapes: X={x_test.shape} and Y={y_test.shape}')
 
     stats = {'step': args, 'metrics': {}}
     for m_dict in args['models']:
@@ -89,11 +149,11 @@ def train_test_models(args):
         logger.info('Fit train data to model')
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            model.fit(x_train_scaled, y_train)
+            model.fit(x_train, y_train)
 
         logger.info('Compute metrics on test data')
-        c_pred = model.predict(x_test_scaled)
-        y_pred = model.predict_proba(x_test_scaled)[:, 1]
+        c_pred = model.predict(x_test)
+        y_pred = model.predict_proba(x_test)[:, 1]
         auc = roc_auc_score(y_test, y_pred)
         ap = average_precision_score(y_test, y_pred)
         precision, recall, f1, _ = precision_recall_fscore_support(

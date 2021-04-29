@@ -2,10 +2,44 @@
     "pipeline": [
         {
             "action": "train_test_models",
-            "dataset_path": "data/processed/HDFS1/ibm_drain.npz",
-            "stats_path": "reports/results/HDFS1-ibm_drain-loglizer.json",
-            "train_size": 0.2,
-            "seed": 14235,
+            "train_path": "data/processed/HDFS1/train/cv1-1/ibm_drain.npz",
+            "test_path": "data/processed/HDFS1/test/ibm_drain.npz",
+            "stats_path": "reports/results/HDFS1/ibm_drain-unsupervised-loglizer.json",
+            "models": [
+                {
+                    "name": "isolation_forest_sklearn",
+                    "args": {
+                        "bootstrap": true,
+                        "contamination": "auto",
+                        "max_features": 32,
+                        "max_samples": 0.01,
+                        "n_estimators": 115,
+                        "random_state": 160121,
+                        "warm_start": false
+                    }
+                },
+                {
+                    "name": "lof_sklearn",
+                    "args": {
+                        "algorithm": "auto",
+                        "contamination": "auto",
+                        "leaf_size": 30,
+                        "metric": "chebyshev",
+                        "metric_params": null,
+                        "n_neighbors": 450,
+                        "novelty": false,
+                        "p": 2,
+                        "n_jobs": 4
+                    }
+                }
+            ]
+        },
+        {
+            "action": "train_test_models",
+            "skip": true,
+            "train_path": "data/processed/HDFS1/train/cv1-1/ibm_drain.npz",
+            "test_path": "data/processed/HDFS1/test/ibm_drain.npz",
+            "stats_path": "reports/results/HDFS1/ibm_drain-loglizer.json",
             "models": [
                 {
                     "name": "logistic_regression",

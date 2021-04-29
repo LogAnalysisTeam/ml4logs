@@ -14,10 +14,7 @@
             "action": "prepare",
             "dataset": "HDFS1",
             "in_dir": "data/raw/HDFS1",
-            "logs_path": "data/interim/HDFS1/logs.txt",
-            "blocks_path": "data/interim/HDFS1/blocks.npy",
-            "labels_path": "data/interim/HDFS1/labels.npy",
-            "timedeltas_path": "data/interim/HDFS1/timedeltas.npy"
+            "out_dir": "data/interim/HDFS1"
         }
     ]
 }

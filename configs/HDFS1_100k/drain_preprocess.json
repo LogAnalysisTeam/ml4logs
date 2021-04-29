@@ -2,18 +2,51 @@
     "pipeline": [
         {
             "action": "parse_ibm_drain",
-            "logs_path": "data/interim/HDFS1_100k/logs.txt",
-            "eventids_path": "data/interim/HDFS1_100k/ibm_drain-eventids.npy",
+            "data_dir": "data/interim/HDFS1_100k",
+            "pairs": [
+                {"logs_name": "train/data.log", "eventids_name": "train/ibm_drain_eventids.npy"},
+                {"logs_name": "test/data.log", "eventids_name": "test/ibm_drain_eventids.npy"},
+                {"logs_name": "train/cv1-1/data.log", "eventids_name": "train/cv1-1/ibm_drain_eventids.npy"},
+                {"logs_name": "val/cv1-1/data.log", "eventids_name": "val/cv1-1/ibm_drain_eventids.npy"}
+            ],
             "templates_path": "data/interim/HDFS1_100k/ibm_drain-templates.csv",
             "regex": "[^:]*: (?P<content>.*)"
         },
         {
             "action": "aggregate_by_blocks",
-            "features_path": "data/interim/HDFS1_100k/ibm_drain-eventids.npy",
-            "blocks_path": "data/interim/HDFS1_100k/blocks.npy",
-            "labels_path": "data/interim/HDFS1_100k/labels.npy",
-            "dataset_path": "data/processed/HDFS1_100k/ibm_drain.npz",
-            "method": "count_vector"
+            "features_path": "data/interim/HDFS1_100k/train/ibm_drain_eventids.npy",
+            "data_path": "data/interim/HDFS1_100k/train/data.log",
+            "labels_path": "data/interim/HDFS1_100k/train/labels.csv",
+            "save_transform_path": "data/interim/HDFS1_100k/ibm_drain-aggregate_transform.npz",
+            "dataset_path": "data/processed/HDFS1_100k/train/ibm_drain.npz",
+            "method": "tf-idf"
+        },
+        {
+            "action": "aggregate_by_blocks",
+            "features_path": "data/interim/HDFS1_100k/train/cv1-1/ibm_drain_eventids.npy",
+            "data_path": "data/interim/HDFS1_100k/train/cv1-1/data.log",
+            "labels_path": "data/interim/HDFS1_100k/train/cv1-1/labels.csv",
+            "load_transform_path": "data/interim/HDFS1_100k/ibm_drain-aggregate_transform.npz",
+            "dataset_path": "data/processed/HDFS1_100k/train/cv1-1/ibm_drain.npz",
+            "method": "tf-idf"
+        },
+        {
+            "action": "aggregate_by_blocks",
+            "features_path": "data/interim/HDFS1_100k/test/ibm_drain_eventids.npy",
+            "data_path": "data/interim/HDFS1_100k/test/data.log",
+            "labels_path": "data/interim/HDFS1_100k/test/labels.csv",
+            "load_transform_path": "data/interim/HDFS1_100k/ibm_drain-aggregate_transform.npz",
+            "dataset_path": "data/processed/HDFS1_100k/test/ibm_drain.npz",
+            "method": "tf-idf"
+        },
+        {
+            "action": "aggregate_by_blocks",
+            "features_path": "data/interim/HDFS1_100k/val/cv1-1/ibm_drain_eventids.npy",
+            "data_path": "data/interim/HDFS1_100k/val/cv1-1/data.log",
+            "labels_path": "data/interim/HDFS1_100k/val/cv1-1/labels.csv",
+            "load_transform_path": "data/interim/HDFS1_100k/ibm_drain-aggregate_transform.npz",
+            "dataset_path": "data/processed/HDFS1_100k/val/cv1-1/ibm_drain.npz",
+            "method": "tf-idf"
         }
     ]
 }

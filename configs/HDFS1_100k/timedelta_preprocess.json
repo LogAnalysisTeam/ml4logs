@@ -1,0 +1,28 @@
+{
+    "pipeline": [
+        {
+            "action": "extract_timedeltas",
+            "data_dir": "data/interim/HDFS1_100k",
+            "pairs": [
+                {"logs_name": "train/data.log", "timedeltas_name": "train/timedeltas.npy"},
+                {"logs_name": "test/data.log", "timedeltas_name": "test/timedeltas.npy"},
+                {"logs_name": "train/cv1-1/data.log", "timedeltas_name": "train/cv1-1/timedeltas.npy"},
+                {"logs_name": "val/cv1-1/data.log", "timedeltas_name": "val/cv1-1/timedeltas.npy"}
+            ]
+        },
+        {
+            "action": "transform_features",
+            "method": "scale_minmax",
+            "save_transform_path": "data/interim/HDFS1_100k/timedeltas_scale_minmax_transform.npz",
+            "data_dir": "data/interim/HDFS1_100k",
+            "fit": ["train/timedeltas.npy"],
+            "remove_sources": true,
+            "transform": [
+                {"source": "train/timedeltas.npy", "target": "train/timedeltas_minmax.npy"},
+                {"source": "test/timedeltas.npy", "target": "test/timedeltas_minmax.npy"},
+                {"source": "train/cv1-1/timedeltas.npy", "target": "train/cv1-1/timedeltas_minmax.npy"},
+                {"source": "val/cv1-1/timedeltas.npy", "target": "val/cv1-1/timedeltas_minmax.npy"}
+            ]
+        }
+    ]
+}

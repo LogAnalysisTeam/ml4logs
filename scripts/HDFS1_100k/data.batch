@@ -1,11 +1,12 @@
 #!/bin/bash
-#SBATCH --partition=cpu
+#SBATCH --partition=cpufast
+#SBATCH --time=00:30:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=32G
 #SBATCH --job-name hdfs1_100k_data
-#SBATCH --output .hdfs1_100k_data_%j.out
+#SBATCH --output .hdfs1_100k_data.%j.out
 
 if [ -f "${PROJECT_DIR}/init_environment.sh" ]; then
     source "${PROJECT_DIR}/init_environment.sh"

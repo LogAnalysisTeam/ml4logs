@@ -3,6 +3,7 @@ __pycache__/
 .ipynb_checkpoints/
 *.egg-info/
 .history/
+.*.out
 
 /data/
 /reports/

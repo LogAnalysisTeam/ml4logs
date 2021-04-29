@@ -26,6 +26,8 @@ def main():
         'train_fasttext': ml4logs.features.fasttext.train_fasttext,
         'preprocess_fasttext': ml4logs.features.fasttext.preprocess_fasttext,
         'parse_ibm_drain': ml4logs.features.parser.parse_ibm_drain,
+        'extract_timedeltas': ml4logs.features.extract_timedeltas.extract_timedeltas,
+        'transform_features': ml4logs.features.transform_features.transform_features,
         'aggregate_by_blocks': ml4logs.features.aggregate.aggregate_by_blocks,
         'aggregate_by_lines': ml4logs.features.aggregate.aggregate_by_lines,
         'train_test_models': ml4logs.models.train_test.train_test_models,

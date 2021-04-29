@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 # ===== FUNCTIONS =====
 def download(args):
     path = pathlib.Path(args['path'])
+    if path.exists():
+        logger.warn(f"File: {path} already exists! Skipping download...")
+        return
 
     ml4logs.utils.mkdirs(files=[path])
 
@@ -38,7 +41,7 @@ def extract(args):
     logger.info('Open \'%s\' as tarfile', in_path)
     with tarfile.open(in_path, 'r:gz') as tar:
         members = tar.getmembers()
-        logger.info('Extract %d files', len(members))
+        logger.info('Extracting %d files', len(members))
         tar.extractall(out_dir, members=members)
 
 
@@ -63,6 +66,9 @@ def merge_features(args):
     arrays = []
     for path_str in args['features_paths']:
         array = np.load(pathlib.Path(path_str))
+        assert 0 < array.ndim <= 2
+        if array.ndim == 1:
+            array = array.reshape(-1, 1) 
         arrays.append(array)
     logger.info('Concatenate input arrays')
     merged_array = np.concatenate(arrays, axis=1)

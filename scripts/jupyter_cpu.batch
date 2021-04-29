@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH --time=10:00:00
+#SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
+#SBATCH --partition=cpu
+#SBATCH --mem=32G
+#SBATCH --error=../.jupyter.%j.err
+#SBATCH --out=../.jupyter.%j.out
+
+PROJECT_DIR=/home/drchajan/devel/python/LOGS/ml4logs
+
+if [ -f "${PROJECT_DIR}/init_environment.sh" ]; then
+    source "${PROJECT_DIR}/init_environment.sh"
+fi
+
+cd ${PROJECT_DIR}
+
+XDG_RUNTIME_DIR=""
+port=$(shuf -i8000-9999 -n1)
+node=$(hostname -s)
+user=$(whoami)
+
+# print tunneling instructions to standard error
+>&2 echo -e "
+MacOS or linux terminal command to create your ssh tunnel for Jupyter and for Dash app on 8050:
+ssh -N -L ${port}:${node}:${port} ${user}@login.rci.cvut.cz
+
+Use a Browser on your local machine to go to:
+localhost:${port}  (prefix w/ https:// if using password)
+"
+
+jupyter-lab --no-browser --port=${port} --ip=${node}

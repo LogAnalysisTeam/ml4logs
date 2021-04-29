@@ -2,38 +2,105 @@
     "pipeline": [
         {
             "action": "train_fasttext",
-            "logs_path": "data/interim/HDFS1_100k/logs.txt",
-            "model_path": "models/embeddings/HDFS1_100k/fasttext_skipgram.bin",
+            "skip": false,
+            "logs_path": "data/interim/HDFS1_100k/train/cv1-1/data.log",
+            "model_path": "models/embeddings/HDFS1_100k/train/cv1-1/fasttext-skipgram-d100-n3-6.bin",
             "model_args": {
                 "dim": 100,
                 "minCount": 10000,
-                "minn": 1,
-                "maxn": 1,
+                "minn": 3,
+                "maxn": 6,
                 "thread": 1,
                 "verbose": 2
             }
         },
         {
             "action": "preprocess_fasttext",
-            "logs_path": "data/interim/HDFS1_100k/logs.txt",
-            "model_path": "models/embeddings/HDFS1_100k/fasttext_skipgram.bin",
-            "embeddings_path": "data/interim/HDFS1_100k/fasttext.npy"
+            "skip": false,
+            "model_path": "models/embeddings/HDFS1_100k/train/cv1-1/fasttext-skipgram-d100-n3-6.bin",
+            "logs_path": "data/interim/HDFS1_100k/train/cv1-1/data.log",
+            "embeddings_path": "data/interim/HDFS1_100k/train/cv1-1/fasttext-skipgram-d100-n3-6.npy"
+        },
+        {
+            "action": "preprocess_fasttext",
+            "skip": false,
+            "model_path": "models/embeddings/HDFS1_100k/train/cv1-1/fasttext-skipgram-d100-n3-6.bin",
+            "logs_path": "data/interim/HDFS1_100k/val/cv1-1/data.log",
+            "embeddings_path": "data/interim/HDFS1_100k/val/cv1-1/fasttext-skipgram-d100-n3-6.npy"
+        },
+        {
+            "action": "preprocess_fasttext",
+            "skip": false,
+            "model_path": "models/embeddings/HDFS1_100k/train/cv1-1/fasttext-skipgram-d100-n3-6.bin",
+            "logs_path": "data/interim/HDFS1_100k/test/data.log",
+            "embeddings_path": "data/interim/HDFS1_100k/test/fasttext-skipgram-d100-n3-6.npy"
+        },
+        {
+            "action": "transform_features",
+            "method": "scale_minmax",
+            "save_transform_path": "data/interim/HDFS1_100k/timedeltas_scale_minmax_transform.npz",
+            "data_dir": "data/interim/HDFS1_100k",
+            "fit": ["train/cv1-1/fasttext-skipgram-d100-n3-6.npy"],
+            "remove_sources": true,
+            "transform": [
+                {"source": "train/cv1-1/fasttext-skipgram-d100-n3-6.npy", "target": "train/cv1-1/fasttext-skipgram-d100-n3-6_minmax.npy"},
+                {"source": "val/cv1-1/fasttext-skipgram-d100-n3-6.npy", "target": "val/cv1-1/fasttext-skipgram-d100-n3-6_minmax.npy"},
+                {"source": "test/fasttext-skipgram-d100-n3-6.npy", "target": "test/fasttext-skipgram-d100-n3-6_minmax.npy"}
+            ]
         },
         {
             "action": "merge_features",
+            "skip": false,
             "features_paths": [
-                "data/interim/HDFS1_100k/fasttext.npy",
-                "data/interim/HDFS1_100k/timedeltas.npy"
+                "data/interim/HDFS1_100k/train/cv1-1/fasttext-skipgram-d100-n3-6_minmax.npy",
+                "data/interim/HDFS1_100k/train/cv1-1/timedeltas_minmax.npy"
             ],
-            "merged_path": "data/interim/HDFS1_100k/fasttext-timedeltas.npy"
+            "merged_path": "data/interim/HDFS1_100k/train/cv1-1/fasttext_timedeltas_minmax.npy"
+        },
+        {
+            "action": "merge_features",
+            "skip": false,
+            "features_paths": [
+                "data/interim/HDFS1_100k/val/cv1-1/fasttext-skipgram-d100-n3-6_minmax.npy",
+                "data/interim/HDFS1_100k/val/cv1-1/timedeltas_minmax.npy"
+            ],
+            "merged_path": "data/interim/HDFS1_100k/val/cv1-1/fasttext_timedeltas_minmax.npy"
+        },
+        {
+            "action": "merge_features",
+            "skip": false,
+            "features_paths": [
+                "data/interim/HDFS1_100k/test/fasttext-skipgram-d100-n3-6_minmax.npy",
+                "data/interim/HDFS1_100k/test/timedeltas_minmax.npy"
+            ],
+            "merged_path": "data/interim/HDFS1_100k/test/fasttext_timedeltas_minmax.npy"
         },
         {
             "action": "aggregate_by_blocks",
-            "features_path": "data/interim/HDFS1_100k/fasttext-timedeltas.npy",
-            "blocks_path": "data/interim/HDFS1_100k/blocks.npy",
-            "labels_path": "data/interim/HDFS1_100k/labels.npy",
-            "dataset_path": "data/processed/HDFS1_100k/fasttext-average.npz",
-            "method": "average"
+            "skip": false,
+            "method": "max",
+            "features_path": "data/interim/HDFS1_100k/train/cv1-1/fasttext_timedeltas_minmax.npy",
+            "data_path": "data/interim/HDFS1_100k/train/cv1-1/data.log",
+            "labels_path": "data/interim/HDFS1_100k/train/cv1-1/labels.csv",
+            "dataset_path": "data/processed/HDFS1_100k/train/cv1-1/fasttext_timedeltas_minmax_blockmax.npz"
+        },
+        {
+            "action": "aggregate_by_blocks",
+            "skip": false,
+            "method": "max",
+            "features_path": "data/interim/HDFS1_100k/val/cv1-1/fasttext_timedeltas_minmax.npy",
+            "data_path": "data/interim/HDFS1_100k/val/cv1-1/data.log",
+            "labels_path": "data/interim/HDFS1_100k/val/cv1-1/labels.csv",
+            "dataset_path": "data/processed/HDFS1_100k/val/cv1-1/fasttext_timedeltas_minmax_blockmax.npz"
+        },
+        {
+            "action": "aggregate_by_blocks",
+            "skip": false,
+            "method": "max",
+            "features_path": "data/interim/HDFS1_100k/test/fasttext_timedeltas_minmax.npy",
+            "data_path": "data/interim/HDFS1_100k/test/data.log",
+            "labels_path": "data/interim/HDFS1_100k/test/labels.csv",
+            "dataset_path": "data/processed/HDFS1_100k/test/fasttext_timedeltas_minmax_blockmax.npz"
         }
     ]
 }

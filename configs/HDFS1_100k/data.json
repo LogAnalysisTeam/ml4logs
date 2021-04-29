@@ -3,11 +3,11 @@
         {
             "action": "download",
             "url": "https://zenodo.org/record/3227177/files/HDFS_1.tar.gz",
-            "path": "data/raw/HDFS1_100k/HDFS1.tar.gz"
+            "path": "data/raw/HDFS1/HDFS1.tar.gz"
         },
         {
             "action": "extract",
-            "in_path": "data/raw/HDFS1_100k/HDFS1.tar.gz",
+            "in_path": "data/raw/HDFS1/HDFS1.tar.gz",
             "out_dir": "data/raw/HDFS1_100k"
         },
         {
@@ -20,10 +20,7 @@
             "action": "prepare",
             "dataset": "HDFS1",
             "in_dir": "data/raw/HDFS1_100k",
-            "logs_path": "data/interim/HDFS1_100k/logs.txt",
-            "blocks_path": "data/interim/HDFS1_100k/blocks.npy",
-            "labels_path": "data/interim/HDFS1_100k/labels.npy",
-            "timedeltas_path": "data/interim/HDFS1_100k/timedeltas.npy"
+            "out_dir": "data/interim/HDFS1_100k"
         }
     ]
 }
