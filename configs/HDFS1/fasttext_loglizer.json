@@ -34,16 +34,26 @@
                     }
                 },
                 {
-                    "name": "one_class_svm",
-                    "args": {
-                        "contamination": 0.03
-                    }
-                },
-                {
                     "name": "pca",
                     "args": {
                         "contamination": 0.03,
                         "random_state": 14235
+                    }
+                }
+            ]
+        },
+        {
+            "action": "train_test_models",
+            "skip": true,
+            "train_path": "data/processed/HDFS1/train/cv1-1/fasttext_timedeltas_minmax_blockmax.npz",
+            "test_path": "data/processed/HDFS1/test/fasttext_timedeltas_minmax_blockmax.npz",
+            "stats_path": "reports/results/HDFS1/fasttext_timedeltas_minmax_blockmax-unsupervised_slow-loglizer.json",
+            "models": [
+
+                {
+                    "name": "one_class_svm",
+                    "args": {
+                        "contamination": 0.03
                     }
                 }
             ]
