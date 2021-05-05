@@ -213,7 +213,7 @@ def train_test_seq2label(args):
     stats = {
         'step': args,
         'training': {method_label: []},
-        'metrics': {method_label: []}
+        'metrics': {}
     }
 
     logger.info('Starting training')
@@ -247,7 +247,7 @@ def train_test_seq2label(args):
     logger.info(f'MCC = {metrics["mcc"]:.2f}')
     logger.info(f'AUC = {metrics["auc"]:.2f}, AP = {metrics["ap"]:.2f}')
 
-    stats['metrics'][method_label].append(metrics)
+    stats['metrics'][method_label] = metrics
 
     logger.info('Saving metrics into \'%s\'', stats_path)
     stats_path.write_text(json.dumps(stats, indent=4))
