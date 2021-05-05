@@ -27,7 +27,7 @@ from sklearn.metrics import (roc_auc_score,
 
 # === Local ===
 import ml4logs
-
+from ml4logs.models.utils import get_metrics, get_threshold_metrics
 
 # ===== GLOBALS =====
 logger = logging.getLogger(__name__)
@@ -143,31 +143,27 @@ def train_test_models(args):
 
     stats = {'step': args, 'metrics': {}}
     for m_dict in args['models']:
-        logger.info('=== Use \'%s\' model ===', m_dict['name'])
+        logger.info('=== Using \'%s\' model ===', m_dict['name'])
         model = MODEL_CLASSES[m_dict['name']](**m_dict['args'])
 
-        logger.info('Fit train data to model')
+        logger.info('Fitting train data to model')
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             model.fit(x_train, y_train)
 
-        logger.info('Compute metrics on test data')
+        logger.info('Computing metrics on test data')
         c_pred = model.predict(x_test)
         y_pred = model.predict_proba(x_test)[:, 1]
-        auc = roc_auc_score(y_test, y_pred)
-        ap = average_precision_score(y_test, y_pred)
-        precision, recall, f1, _ = precision_recall_fscore_support(
-            y_test, c_pred, average='binary', zero_division=0
-        )
-        logger.info('AUC = %.2f, AP = %.2f', auc, ap)
-        logger.info('Precision = %.2f, Recall = %.2f, F1-score = %.2f',
-                    precision, recall, f1)
+        # logger.info(f"c_pred = {c_pred.shape}, y_pred = {y_pred.shape}, y_test = {y_test.shape}")
 
-        stats['metrics'][m_dict['name']] = {'auc': auc,
-                                            'ap': ap,
-                                            'precision': precision,
-                                            'recall': recall,
-                                            'f1': f1}
+        metrics = get_metrics(y_test, c_pred)
+        metrics.update(get_threshold_metrics(y_test, y_pred))
 
-    logger.info('Save metrics into \'%s\'', stats_path)
+        logger.info(f'Precision = {metrics["precision"]:.2f}, Recall = {metrics["recall"]:.2f}, F1-score = {metrics["f1"]:.2f}')
+        logger.info(f'MCC = {metrics["mcc"]:.2f}')
+        logger.info(f'AUC = {metrics["auc"]:.2f}, AP = {metrics["ap"]:.2f}')
+
+        stats['metrics'][m_dict['name']] = metrics
+
+    logger.info('Saving metrics to \'%s\'', stats_path)
     stats_path.write_text(json.dumps(stats, indent=4))

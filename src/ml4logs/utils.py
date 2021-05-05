@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def setup_logging(level=logging.INFO):
     root_logger = logging.getLogger()
     root_logger.setLevel(level)
-    LOG_FORMAT = '[{asctime}][{levelname}][{name}] {message}'
+    LOG_FORMAT = '[{asctime}][{levelname}][{name}:{lineno}] {message}'
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
     formatter = logging.Formatter(
         fmt=LOG_FORMAT, datefmt=DATE_FORMAT, style='{')

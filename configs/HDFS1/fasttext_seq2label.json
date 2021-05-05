@@ -22,8 +22,37 @@
             "lr_scheduler_kwargs": {
                 "gamma": 0.9817
             },
+            "many_to_one": true,
             "batch_size": 512,
-            "epochs": 5,
+            "epochs": 100,
+            "device": "cuda",
+            "seed": 14235
+        },
+        {
+            "action": "train_test_seq2label",
+            "train_path": "data/processed/HDFS1/train/cv1-1/fasttext_timedeltas_minmax.npy",
+            "train_label_path": "data/interim/HDFS1/train/cv1-1/labels.csv",
+            "val_path": "data/processed/HDFS1/val/cv1-1/fasttext_timedeltas_minmax.npy",
+            "val_label_path": "data/interim/HDFS1/val/cv1-1/labels.csv",
+            "test_path": "data/processed/HDFS1/test/fasttext_timedeltas_minmax.npy",
+            "test_label_path": "data/interim/HDFS1/test/labels.csv",
+            "stats_path": "reports/results/HDFS1/fasttext_timedeltas_minmax-seq2label-m2m.json",
+
+            "model_kwargs": {
+                "n_lstm_layers": 1,
+                "n_hidden_linears": 2,
+                "linear_width": 300,
+                "linear_norm": false
+            },
+            "optim_kwargs": {
+                "lr": 1e-2
+            },
+            "lr_scheduler_kwargs": {
+                "gamma": 0.9817
+            },
+            "many_to_one": false,
+            "batch_size": 512,
+            "epochs": 100,
             "device": "cuda",
             "seed": 14235
         }

@@ -17,6 +17,8 @@ setup(
         'drain3',
         'sklearn', 
         'pyod',
-        'torch'
+        'torch',
+        'tqdm',
+        'tqdm-logging-wrapper'
     ]
 )

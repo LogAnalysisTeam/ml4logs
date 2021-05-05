@@ -2,6 +2,7 @@
     "pipeline": [
         {
             "action": "train_test_models",
+            "skip": false,
             "train_path": "data/processed/HDFS1/train/cv1-1/ibm_drain.npz",
             "test_path": "data/processed/HDFS1/test/ibm_drain.npz",
             "stats_path": "reports/results/HDFS1/ibm_drain-unsupervised-loglizer.json",
@@ -15,7 +16,8 @@
                         "max_samples": 0.01,
                         "n_estimators": 115,
                         "random_state": 160121,
-                        "warm_start": false
+                        "warm_start": false,
+                        "n_jobs": 4
                     }
                 },
                 {
@@ -31,12 +33,25 @@
                         "p": 2,
                         "n_jobs": 4
                     }
+                },
+                {
+                    "name": "one_class_svm",
+                    "args": {
+                        "contamination": 0.03
+                    }
+                },
+                {
+                    "name": "pca",
+                    "args": {
+                        "contamination": 0.03,
+                        "random_state": 14235
+                    }
                 }
             ]
         },
         {
             "action": "train_test_models",
-            "skip": true,
+            "skip": false,
             "train_path": "data/processed/HDFS1/train/cv1-1/ibm_drain.npz",
             "test_path": "data/processed/HDFS1/test/ibm_drain.npz",
             "stats_path": "reports/results/HDFS1/ibm_drain-loglizer.json",
@@ -62,20 +77,6 @@
                         "penalty": "l1",
                         "tol": 0.1,
                         "dual": false,
-                        "random_state": 14235
-                    }
-                },
-                {
-                    "name": "lof",
-                    "args": {}
-                },
-                {
-                    "name": "one_class_svm",
-                    "args": {}
-                },
-                {
-                    "name": "isolation_forest",
-                    "args": {
                         "random_state": 14235
                     }
                 }

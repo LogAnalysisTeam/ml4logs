@@ -32,12 +32,25 @@
                         "p": 2,
                         "n_jobs": 4
                     }
+                },
+                {
+                    "name": "one_class_svm",
+                    "args": {
+                        "contamination": 0.03
+                    }
+                },
+                {
+                    "name": "pca",
+                    "args": {
+                        "contamination": 0.03,
+                        "random_state": 14235
+                    }
                 }
             ]
         },
         {
             "action": "train_test_models",
-            "skip": "true",
+            "skip": false,
             "train_path": "data/processed/HDFS1/train/cv1-1/fasttext_timedeltas_minmax_blockmax.npz",
             "test_path": "data/processed/HDFS1/test/fasttext_timedeltas_minmax_blockmax.npz",
             "stats_path": "reports/results/HDFS1/fasttext_timedeltas_minmax_blockmax-loglizer.json",
@@ -63,26 +76,6 @@
                         "penalty": "l1",
                         "tol": 0.1,
                         "dual": false,
-                        "random_state": 14235
-                    }
-                },
-                {
-                    "name": "lof",
-                    "args": {}
-                },
-                {
-                    "name": "one_class_svm",
-                    "args": {}
-                },
-                {
-                    "name": "isolation_forest",
-                    "args": {
-                        "random_state": 14235
-                    }
-                },
-                {
-                    "name": "pca",
-                    "args": {
                         "random_state": 14235
                     }
                 }

@@ -32,6 +32,19 @@
                         "p": 2,
                         "n_jobs": 4
                     }
+                },
+                {
+                    "name": "one_class_svm",
+                    "args": {
+                        "contamination": 0.03
+                    }
+                },
+                {
+                    "name": "pca",
+                    "args": {
+                        "contamination": 0.03,
+                        "random_state": 14235
+                    }
                 }
             ]
         },
@@ -62,26 +75,6 @@
                         "penalty": "l1",
                         "tol": 0.1,
                         "dual": false,
-                        "random_state": 14235
-                    }
-                },
-                {
-                    "name": "lof",
-                    "args": {}
-                },
-                {
-                    "name": "one_class_svm",
-                    "args": {}
-                },
-                {
-                    "name": "isolation_forest",
-                    "args": {
-                        "random_state": 14235
-                    }
-                },
-                {
-                    "name": "pca",
-                    "args": {
                         "random_state": 14235
                     }
                 }

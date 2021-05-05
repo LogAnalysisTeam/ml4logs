@@ -24,7 +24,7 @@ hdfs1_100k_train_test:
 	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1_100k/drain_loglizer.batch"
 	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1_100k/fasttext_loglizer.batch"
 #	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1_100k/fasttext_seq2seq.batch"
-#	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1_100k/fasttext_seq2label.batch"
+	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1_100k/fasttext_seq2label.batch"
 
 hdfs1_data:
 	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1/data.batch"
@@ -38,7 +38,7 @@ hdfs1_train_test:
 	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1/drain_loglizer.batch"
 	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1/fasttext_loglizer.batch"
 #	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1/fasttext_seq2seq.batch"
-#	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1/fasttext_seq2label.batch"
+	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/HDFS1/fasttext_seq2label.batch"
 
 bgl_100k:
 	$(ML4LOGS_SHELL) "$(PROJECT_DIR)/scripts/bgl_100k.batch"
