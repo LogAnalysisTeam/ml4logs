@@ -26,4 +26,7 @@ Use a Browser on your local machine to go to:
 localhost:${port}  (prefix w/ https:// if using password)
 "
 
+HF_HOME="/data/temporary/huggingface_${SLURM_JOB_ID}"
+export HF_HOME
+
 jupyter-lab --no-browser --port=${port} --ip=${node}

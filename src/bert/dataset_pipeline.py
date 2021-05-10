@@ -300,3 +300,4 @@ def flatten_contexts_in_dataset(ds: Dataset,
         if save_dataset:
             log.info(f'Time taken so far: {time() - start}s, saving to {output_path}')
             output_ds.save_to_disk(output_path)
+    return output_ds

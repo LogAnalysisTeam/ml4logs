@@ -30,7 +30,7 @@ if __name__ == '__main__':
     aetcn_val_basepath = Path('/home/cernypro/dev/source/ml4logs/data/interim/no_timestamps_val-data-HDFS1-cv1-1')
     aetcn_test_basepath = Path('/home/cernypro/dev/source/ml4logs/data/interim/no_timestamps_test-data-HDFS1')
 
-    epochs = [3]
+    epochs = [5]
     seeds = [43]
     truncations = ['Smart_Average', 'Concat_To_Max']
 
@@ -41,19 +41,19 @@ if __name__ == '__main__':
     #     (Path('/home/cernypro/dev/source/ml4logs/data/processed/train-data-HDFS1-cv1-1-time-ordered_roberta/flattened_contexts_epochs-4_seed-43_truncation-Concat_To_Max'), 'M_time_ordered_chunked_10_roberta')
     # ]
 
-    ict_datasets_full_paths = [
-        (Path('/home/cernypro/dev/source/ml4logs/data/processed/train-data-HDFS1-cv1-1_Epochs-4_Seed-43'), 'M_basic_chunked_10'),
-        (Path('/home/cernypro/dev/source/ml4logs/data/processed/train-data-HDFS1-cv1-1-time-ordered_Epochs-4_Seed-43'), 'M_time_ordered_chunked_10')
-    ]
+    # ict_datasets_full_paths = [
+    #     (Path('/home/cernypro/dev/source/ml4logs/data/processed/train-data-HDFS1-cv1-1_Epochs-4_Seed-43'), 'M_basic_chunked_10'),
+    #     (Path('/home/cernypro/dev/source/ml4logs/data/processed/train-data-HDFS1-cv1-1-time-ordered_Epochs-4_Seed-43'), 'M_time_ordered_chunked_10')
+    # ]
 
-    # for epoch in epochs:
-    #     for seed in seeds:
-    #         for truncation in truncations:
-    #             dataset_folder_name = f'flattened_contexts_epochs-{epoch}_seed-{seed}_truncation-{truncation}'
-    #             dataset_path = ict_datasets_basepath / dataset_folder_name
-    #             dataset_run_name = f'Combined_20210401_roberta_{truncation.lower().replace("_", "-")}_epochs-{epoch}_seed-{seed}'
-    #             # dataset_run_name = f'Combined_20210401_{truncation.lower().replace("_", "-")}_epochs-{epoch}_seed-{seed}'
-    #             ict_datasets_full_paths.append((dataset_path, dataset_run_name))
+    for epoch in epochs:
+        for seed in seeds:
+            for truncation in truncations:
+                dataset_folder_name = f'flattened_contexts_epochs-{epoch}_seed-{seed}_truncation-{truncation}'
+                dataset_path = ict_datasets_basepath / dataset_folder_name
+                # dataset_run_name = f'Combined_20210401_roberta_{truncation.lower().replace("_", "-")}_epochs-{epoch}_seed-{seed}'
+                dataset_run_name = f'Combined_20210401_{truncation.lower().replace("_", "-")}_epochs-{epoch}_seed-{seed}'
+                ict_datasets_full_paths.append((dataset_path, dataset_run_name))
     
     for dataset_path, dataset_run_name in ict_datasets_full_paths:
         for two_tower in [False, True]:

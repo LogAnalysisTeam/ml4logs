@@ -2,7 +2,7 @@
 #SBATCH --time=4:00:00
 #SBATCH --nodes=1 --ntasks-per-node=1 --cpus-per-task=4
 #SBATCH --partition=cpufast
-#SBATCH --mem=50G
+#SBATCH --mem=24G
 #SBATCH --error=../logs/jupyter_cpufast.%j.err
 #SBATCH --out=../logs/jupyter_cpufast.%j.out
 
