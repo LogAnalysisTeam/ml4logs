@@ -22,7 +22,9 @@ Project Organization
     │   └── raw            <- The original, immutable data dump.
     │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │   └── anomaly_detection     <- Subfolder for anomaly detection experiment models
+    │   ├── anomaly_detection     <- Subfolder for anomaly detection experiment models
+    │   ├── encoders              <- Subfolder for trained encoders
+    │   └── ICT                   <- Subfolder for checkpoints during encoder training using ICT
     │
     ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
     │                         the creator's initials, and a short `-` delimited description, e.g.
@@ -65,6 +67,10 @@ Project Organization
     │   │   ├── tokenize_and_chunkify.py - Runnable script for initial creation of chunked dataset from raw .log text files
     │   │   └── tokenize_chunkify_train-val-split_combine.py - Runnable script for initial creation of more complex chunked dataset by mixing several source raw .log datasets
     │   │   └── train_ict_preprocessed_data.py - Runnable script for main Sentence Encoder training using ICT, accepting datasets created by prepare_ict_dataset_from_chunks
+    |   |
+    │   ├── features   <- minor preprocessing scripts
+    |   |   ├── embed_labeled_dataset_fasttext_for_anomaly_detection.py - Create baseline embeddings using trained fastText
+    │   │   └── train_fasttext.py - Train baseline fastText model
 
 
 
