@@ -16,9 +16,9 @@ from tqdm import tqdm
 from typing import List, Callable
 import sys
 
-from utils import time_decorator
-from tcnn import TemporalConvNet
-from datasets import CroppedDataset1D, EmbeddingDataset
+from anomaly_detection.utils import time_decorator
+from anomaly_detection.tcnn import TemporalConvNet
+from anomaly_detection.datasets import CroppedDataset1D, EmbeddingDataset
 
 SEED = 160121
 

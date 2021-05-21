@@ -14,7 +14,7 @@ import pickle
 import numpy as np
 from scipy import stats
 
-from metrics import get_metrics
+from anomaly_detection.metrics import get_metrics
 
 SEED = 160121
 np.random.seed(SEED)
