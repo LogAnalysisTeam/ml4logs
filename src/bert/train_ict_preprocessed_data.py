@@ -92,7 +92,6 @@ def run_experiment(config):
     
 
 def main():
-    print("Running in main func")
     import argparse
     parser = argparse.ArgumentParser(description="Runner for ICT experiments")
     parser.add_argument('--two-tower', default=0, type=int, help="Use TwoTowerICT, use int values, 0 for false, 1 for true")
@@ -121,5 +120,4 @@ def main():
 
 
 if __name__ == '__main__':
-    print("Running in if name main")
     main()
