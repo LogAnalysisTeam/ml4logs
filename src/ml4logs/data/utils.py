@@ -42,7 +42,29 @@ def extract(args):
     with tarfile.open(in_path, 'r:gz') as tar:
         members = tar.getmembers()
         logger.info('Extracting %d files', len(members))
-        tar.extractall(out_dir, members=members)
+        
+        import os
+        
+        def is_within_directory(directory, target):
+            
+            abs_directory = os.path.abspath(directory)
+            abs_target = os.path.abspath(target)
+        
+            prefix = os.path.commonprefix([abs_directory, abs_target])
+            
+            return prefix == abs_directory
+        
+        def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+        
+            for member in tar.getmembers():
+                member_path = os.path.join(path, member.name)
+                if not is_within_directory(path, member_path):
+                    raise Exception("Attempted Path Traversal in Tar File")
+        
+            tar.extractall(path, members, numeric_owner=numeric_owner) 
+            
+        
+        safe_extract(tar, out_dir, members=members)
 
 
 def head(args):
